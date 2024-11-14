@@ -1,2 +1,4 @@
-# Airline-Ticket-Reserve-System
-Class Project for CS_3083
+# Online Airline Ticket Reservation System
+Class Project for CS-UY 3083
+
+Contributors: Allen Lu, Aiden Lee
