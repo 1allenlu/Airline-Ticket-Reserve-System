@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+
+<head>
+	<meta charset="UTF-8">
+    <title>AL FlyHub</title>
+</head>
+
+<body>
+	<header>
+        <h1>Welcome to AL FlyHub</h1>
+    </header>
+
+	<main>
+		<!-- Public Flight Search -->
+        <section id="flight-search">
+            <h2>Search for Flights</h2>
+            <form action="/search-flights" method="GET">
+
+				<label for="source-city">Departure City:</label>
+				<input type="text" id="source-city" name="source-city" required><br>
+
+				<label for="departure-airport">Departure Airport:</label>
+				<input type="text" id="departure-airport" name="departure-airport" required><br> 
+				
+				<label for="destination-city">Destination City:</label>
+				<input type="text" id="destination-city" name="destination-city" required><br> 
+
+				<label for="destination-airport">Destination Airport:</label>
+				<input type="text" id="destination-airport" name="destination-airport" required><br> 
+
+				<label for="departure-date">Departure Date:</label>
+				<input type="date" id="departure-date" name="departure-date" required><br> 
+
+				<label for="return-date">Return Date (Optional):</label>
+				<input type="date" id="return-date" name="return-date"><br> 
+                
+                <button type="submit">Search</button>
+            </form>
+        </section>
+		<!--
+        // check flight status 
+        <section id="flight-status">
+            <h2>Check Flight Status</h2>
+            <form action="/check-flight-status" method="GET">
+                <label for="airline">Airline Name:</label>
+                <input type="text" id="airline" name="airline" required>
+                
+                <label for="flight-number">Flight Number:</label>
+                <input type="text" id="flight-number" name="flight_number" required>
+                
+                <label for="status-date">Date:</label>
+                <input type="date" id="status-date" name="date" required>
+                
+                <button type="submit">Check Status</button>
+            </form>
+        </section>
+		-->
+        
+        <!-- Register -->
+        <section id="register">
+            <h2>Register</h2>
+            <p>
+                <a href="/register/customer">Register as Customer</a> |
+                <a href="/register/staff">Register as Airline Staff</a>
+            </p>
+        </section>
+        
+        <!-- Login -->
+        <section id="login">
+            <h2>Login</h2>
+            <form action="/login" method="POST">
+                <label for="username">Email:</label>
+                <input type="email" id="username" name="username" required>
+                
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                
+                <button type="submit">Login</button>
+            </form>
+        </section>
+    </main>
+    
+<!--
+{% if not message %}
+	<a href="/login">Login</a>
+	<a href="/register">Register</a>
+{% endif %}
+
+{% if message %}
+	<a href="/logout">Logout</a>
+	<a href="/remove_account">Remove Account</a>
+	<p class="message">You are logged in {{message}}. You have {{num}} follower(s)</p> </br>
+	<a href="/tweets">View your tweets</a> </br>
+	<a href="/find_people">Find people to follow</a> </br>
+	<a href="/unfollow">Unfollow someone</a> </br>
+	<a href="/view_followed">View people you have followed</a> </br>
+	</br>
+
+        <h4>15 most recent tweets from you and your followers </h4> </br>
+
+	{% for line in tweets%}
+	        <p>{{line}}</p>
+	        <hr>
+	{% endfor %}
+	{% endif %}
+
+	
+-->
+</body>
+
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+</head>
+<body>
+    <h1>Flight Search Results</h1>
+    
+    <!-- If there are flights, display them in a table -->
+    {% if flights %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Flight Number</th>
+                    <th>Airline Name</th>
+                    <th>Departure City</th>
+                    <th>Departure Airport</th>
+                    <th>Destination City</th>
+                    <th>Destination Airport</th>
+                    <th>Departure Time</th>
+                    <th>Arrival Time</th>
+                    <th>Base Price</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for flight in flights %}
+                <tr>
+                    <td>{{ flight.flight_number }}</td>
+                    <td>{{ flight.airline_name }}</td>
+                    <td>{{ flight.departure_city }}</td>
+                    <td>{{ flight.departure_airport }}</td>
+                    <td>{{ flight.destination_city }}</td>
+                    <td>{{ flight.destination_airport }}</td>
+                    <td>{{ flight.departure_datetime }}</td>
+                    <td>{{ flight.arrival_datetime }}</td>
+                    <td>${{ flight.base_price }}</td>
+                    <td>{{ flight.flight_status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <!-- Message if no flights match the search criteria -->
+        <p>No flights match your search criteria. Please try again.</p>
+    {% endif %}
+    
+    <br>
+    <a href="/">Back to Home</a>
+</body>
+</html>
