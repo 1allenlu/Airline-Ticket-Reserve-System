@@ -1,15 +1,58 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Registration</title>
 </head>
 <body>
-<form action="/register1Auth" method="POST">
-	<input type="text" name = "username" placeholder="username" required/> </br>
-	<input type="password" name = "password" placeholder="password" required/></br>
-	<input type="submit" value = Register />
-	{% if error %}
-		<p class="error"><strong>Error:</strong> {{error}}</p>
-	{% endif %}
-</form>
-<a href="/">Go back</a>
+    <h1>Customer Registration</h1>
+    <form action="/register1Auth" method="POST">
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="thepassword">Password:</label><br>
+        <input type="password" id="thepassword" name="thepassword" required><br><br>
+
+        <label for="first_name">First Name:</label><br>
+        <input type="text" id="first_name" name="first_name" required><br><br>
+
+        <label for="last_name">Last Name:</label><br>
+        <input type="text" id="last_name" name="last_name" required><br><br>
+
+        <label for="building_num">Building Number:</label><br>
+        <input type="number" id="building_num" name="building_num" required><br><br>
+
+        <label for="street_name">Street Name:</label><br>
+        <input type="text" id="street_name" name="street_name" required><br><br>
+
+        <label for="apt_num">Apartment Number:</label><br>
+        <input type="number" id="apt_num" name="apt_num" required><br><br>
+
+        <label for="city">City:</label><br>
+        <input type="text" id="city" name="city" required><br><br>
+
+        <label for="state_name">State:</label><br>
+        <input type="text" id="state_name" name="state_name" required><br><br>
+
+        <label for="zip_code">Zip Code:</label><br>
+        <input type="number" id="zip_code" name="zip_code" required><br><br>
+
+        <label for="passport_number">Passport Number:</label><br>
+        <input type="number" id="passport_number" name="passport_number" required><br><br>
+
+        <label for="passport_expiration">Passport Expiration Date:</label><br>
+        <input type="date" id="passport_expiration" name="passport_expiration" required><br><br>
+
+        <label for="passport_country">Passport Country:</label><br>
+        <input type="text" id="passport_country" name="passport_country" required><br><br>
+
+        <label for="date_of_birth">Date of Birth:</label><br>
+        <input type="date" id="date_of_birth" name="date_of_birth" required><br><br>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <p>Already registered? <a href="/login">Login here</a>.</p>
 </body>
 </html>
