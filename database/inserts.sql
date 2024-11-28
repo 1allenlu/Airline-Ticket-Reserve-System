@@ -5,25 +5,25 @@ INSERT INTO Airport VALUES (1, 'JFK', 'NYC', 'USA', 5, 'International');
 INSERT INTO Airport VALUES (2, 'PVG', 'Shanghai', 'China', 2, 'International');
 
 
-INSERT INTO Customer VALUES ('dante999@gmail.com', 'Dante', 'Minasyan', 10, 'Jay Street', 55, 'Brooklyn', 'NY', 11201, 123456789, '2030-01-01', 'Armenia', '2004-12-08');
-INSERT INTO Customer VALUES ('vivian0000@gmail.com', 'Vivian', 'Teo', 20, 'Gold Street', 30, 'Irvine', 'CA', 92617, 987654321, '2035-01-01', 'USA', '2005-09-05');
-INSERT INTO Customer VALUES ('evannnnn@gmail.com', 'Evan', 'Dworkin', 30, 'Ray Street', 999, 'San Jose', 'CA', 94088, 543216789, '2026-01-01', 'Taiwan', '2005-08-31');
+INSERT INTO Customer VALUES ('dante999@gmail.com', 'hahaha', 'Dante', 'Minasyan', 10, 'Jay Street', 55, 'Brooklyn', 'NY', 11201, 123456789, '2030-01-01', 'Armenia', '2004-12-08');
+INSERT INTO Customer VALUES ('vivian0000@gmail.com', 'bibian', 'Vivian', 'Teo', 20, 'Gold Street', 30, 'Irvine', 'CA', 92617, 987654321, '2035-01-01', 'USA', '2005-09-05');
+INSERT INTO Customer VALUES ('evannnnn@gmail.com', 'evanevan', 'Evan', 'Dworkin', 30, 'Ray Street', 999, 'San Jose', 'CA', 94088, 543216789, '2026-01-01', 'Taiwan', '2005-08-31');
 
 
-INSERT INTO Airplane VALUES (123, 'Jet Blue', 'Boeing', '747', '2010-05-05');
-INSERT INTO Airplane VALUES (456, 'Jet Blue', 'Boeing', '747', '2015-05-05');
-INSERT INTO Airplane VALUES (789, 'Jet Blue', 'Airbus', '220', '2018-05-05');
-INSERT INTO Airplane VALUES (999, 'American Airlines', 'Airbus', '220', '2018-05-06');
+INSERT INTO Airplane VALUES (123, 'Jet Blue', 'Boeing', '747', '2010-05-05', 100);
+INSERT INTO Airplane VALUES (456, 'Jet Blue', 'Boeing', '747', '2015-05-05', 200);
+INSERT INTO Airplane VALUES (789, 'Jet Blue', 'Airbus', '220', '2018-05-05', 300);
+INSERT INTO Airplane VALUES (999, 'American Airlines', 'Airbus', '220', '2018-05-06', 200);
 
 
 
-INSERT INTO Airline_Staff VALUES ('allenlu', 'hahahausofunny0101', 'Jet Blue');
+INSERT INTO Airline_Staff VALUES ('allenlu', 'hahahausofunny0101', 'Jet Blue', 'Allen', 'Lu', '2004-05-26');
 
 
-INSERT INTO Flight VALUES (100, '2024-11-05 12:05:20', 'Jet Blue', '2024-11-05 14:05:20', 300, 'On-time', 001, 002);
-INSERT INTO Flight VALUES (200, '2024-11-12 12:05:20', 'Jet Blue', '2024-11-12 14:05:20', 300, 'On-time', 001, 002);
-INSERT INTO Flight VALUES (300, '2024-11-13 12:05:20', 'Jet Blue', '2024-11-13 14:05:20', 300, 'Delayed', 001, 002);
-INSERT INTO Flight VALUES (400, '2024-11-14 12:05:20', 'Jet Blue', '2024-11-14 14:05:20', 300, 'Delayed', 001, 002);
+INSERT INTO Flight VALUES (100, '2024-11-05 12:05:20', 'Jet Blue', 123, 500, '2024-11-05 14:05:20', 300, 'On-time', 001, 002);
+INSERT INTO Flight VALUES (200, '2024-11-12 12:05:20', 'Jet Blue', 123, 400, '2024-11-12 14:05:20', 300, 'On-time', 001, 002);
+INSERT INTO Flight VALUES (300, '2024-11-13 12:05:20', 'Jet Blue', 123, 300, '2024-11-13 14:05:20', 300, 'Delayed', 001, 002);
+INSERT INTO Flight VALUES (400, '2024-11-14 12:05:20', 'Jet Blue', 123, 300, '2024-11-14 14:05:20', 300, 'Delayed', 001, 002);
 
 
 INSERT INTO Ticket VALUES (100, 500);

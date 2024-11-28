@@ -5,11 +5,11 @@ airline_name VARCHAR(255) PRIMARY KEY
 
 CREATE TABLE Airline_Staff (
 username VARCHAR(255),
-airline_name VARCHAR(255), 
 thepassword VARCHAR(255),
+airline_name VARCHAR(255), 
 first_name VARCHAR(255), 
 last_name VARCHAR(255), 
-date_of_birth DATETIME
+date_of_birth DATE,
 FOREIGN KEY (airline_name) REFERENCES Airline(airline_name),
 PRIMARY KEY (username)
 );
@@ -61,7 +61,7 @@ PRIMARY KEY (ticket_id)
 
 
 CREATE TABLE Airport(
-airport_code int,
+airport_code VARCHAR(255),
 airport_name VARCHAR(255),
 city VARCHAR(255),
 country VARCHAR(255),
@@ -77,12 +77,12 @@ airline_name VARCHAR(255),
 airplane_id int,
 base_price int,
 flight_status VARCHAR(255),
-arrival_airport_code int,
-departure_airport_code int,
+arrival_airport_code VARCHAR(255),
+departure_airport_code VARCHAR(255),
 arrival_datetime DATETIME,
 FOREIGN KEY (arrival_airport_code) REFERENCES Airport(airport_code),
 FOREIGN KEY (departure_airport_code) REFERENCES Airport(airport_code),
-FOREIGN KEY (airline_id) REFERENCES Airplane(airline_id),
+FOREIGN KEY (airplane_id) REFERENCES Airplane(airplane_id),
 FOREIGN KEY (airline_name) REFERENCES Airline (airline_name), 
 PRIMARY KEY(flight_number, departure_datetime, airline_name)
 );
@@ -90,6 +90,7 @@ PRIMARY KEY(flight_number, departure_datetime, airline_name)
 
 CREATE TABLE Customer(
 email VARCHAR(255),
+thepassword VARCHAR(255),
 first_name VARCHAR(255),
 last_name VARCHAR(255),
 building_num int,
