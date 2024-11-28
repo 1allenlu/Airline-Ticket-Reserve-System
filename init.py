@@ -116,12 +116,6 @@ def logout():
 @app.route('/search-flights', methods=['GET'])
 def searchFlights():
     # Get form data
-    # source_city = request.form['source-city']
-    # source_airport = request.form['departure-airport']
-    # destination_city = request.args.form['destination-city']
-    # destination_airport = request.form['destination-airport']
-    # departure_date = request.args.form['departure-date']
-    # return_date = request.form['return-date']  # Optional
     source_city = request.args.get('source-city')
     source_airport = request.args.get('departure-airport')
     destination_city = request.args.get('destination-city')
@@ -143,7 +137,7 @@ def searchFlights():
         a1.city AS departure_city,
         a2.airport_name AS destination_airport,
         a2.city AS destination_city
-    FROM 
+    FROM l
         Flight AS f
     JOIN 
         Airport AS a1 ON f.departure_airport_code = a1.airport_code
