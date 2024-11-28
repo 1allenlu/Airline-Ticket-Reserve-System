@@ -61,7 +61,7 @@ PRIMARY KEY (ticket_id)
 
 
 CREATE TABLE Airport(
-airport_code VARCHAR(255),
+airport_code int,
 airport_name VARCHAR(255),
 city VARCHAR(255),
 country VARCHAR(255),
@@ -77,8 +77,8 @@ airline_name VARCHAR(255),
 airplane_id int,
 base_price int,
 flight_status VARCHAR(255),
-arrival_airport_code VARCHAR(255),
-departure_airport_code VARCHAR(255),
+arrival_airport_code int,
+departure_airport_code int,
 arrival_datetime DATETIME,
 FOREIGN KEY (arrival_airport_code) REFERENCES Airport(airport_code),
 FOREIGN KEY (departure_airport_code) REFERENCES Airport(airport_code),

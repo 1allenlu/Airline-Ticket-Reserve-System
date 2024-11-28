@@ -20,10 +20,10 @@ INSERT INTO Airplane VALUES (999, 'American Airlines', 'Airbus', '220', '2018-05
 INSERT INTO Airline_Staff VALUES ('allenlu', 'hahahausofunny0101', 'Jet Blue', 'Allen', 'Lu', '2004-05-26');
 
 
-INSERT INTO Flight VALUES (100, '2024-11-05 12:05:20', 'Jet Blue', 123, 500, '2024-11-05 14:05:20', 300, 'On-time', 001, 002);
-INSERT INTO Flight VALUES (200, '2024-11-12 12:05:20', 'Jet Blue', 123, 400, '2024-11-12 14:05:20', 300, 'On-time', 001, 002);
-INSERT INTO Flight VALUES (300, '2024-11-13 12:05:20', 'Jet Blue', 123, 300, '2024-11-13 14:05:20', 300, 'Delayed', 001, 002);
-INSERT INTO Flight VALUES (400, '2024-11-14 12:05:20', 'Jet Blue', 123, 300, '2024-11-14 14:05:20', 300, 'Delayed', 001, 002);
+INSERT INTO Flight VALUES (100, '2024-11-05 12:05:20', 'Jet Blue', 123, 500, 'On-time', 1, 2, '2024-11-05 14:05:20');
+INSERT INTO Flight VALUES (200, '2024-11-12 12:05:20', 'Jet Blue', 123, 400, 'On-time', 1, 2, '2024-11-12 14:05:20');
+INSERT INTO Flight VALUES (300, '2024-11-13 12:05:20', 'Jet Blue', 123, 300, 'Delayed', 2, 1, '2024-11-13 14:05:20');
+INSERT INTO Flight VALUES (400, '2024-11-14 12:05:20', 'Jet Blue', 123, 300, 'Delayed', 2, 1, '2024-11-14 14:05:20');
 
 
 INSERT INTO Ticket VALUES (100, 500);
@@ -32,5 +32,5 @@ INSERT INTO Ticket VALUES (102, 520);
 INSERT INTO Ticket VALUES (103, 530);
 
 
-INSERT INTO Purchases VALUES ('evannnnn@gmail.com', 100, 'Evan Dworkin', '4040505060607070', 'Credit', '2024-09-09 10:00:00', '2025-10-10');
-INSERT INTO Purchases VALUES ('dante999@gmail.com', 101, 'Dante Minasyan', '5567567567567567', 'Debit', '2024-09-12 10:00:00', '2027-10-10');
+INSERT INTO Purchases VALUES (100, 'evannnnn@gmail.com', 'Evan Dworkin', '123123', 'credit', '2024-09-09 10:00:00', '2025-10-10', 'evan', 'dworking', '2005-08-31');
+INSERT INTO Purchases VALUES (101, 'dante999@gmail.com', 'Dante Minasyan', '456456', 'debit', '2024-09-09 10:00:00', '2025-10-10', 'dante', 'minas', '2005-12-08');

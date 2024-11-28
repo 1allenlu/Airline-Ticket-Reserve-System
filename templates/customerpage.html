@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="customerpage">
+    <title>Customer Page</title>
+</head>
+<body>
+    <section id="customer-use-cases">
+        <h1>Customer Page</h1>
+        <button type="submit">View My Flights</button> 
+        
+        <section id="flight-search">
+            <h2>Search for Flights</h2>
+            <form action="/search-flights" method="GET">
+
+				<label for="departure-airport">Departure Airport:</label>
+				<input type="text" id="departure-airport" name="departure-airport" required><br> 
+
+				<label for="destination-airport">Destination Airport:</label>
+				<input type="text" id="destination-airport" name="destination-airport" required><br> 
+
+				<label for="departure-date">Departure Date:</label>
+				<input type="date" id="departure-date" name="departure-date" required><br> 
+
+				<label for="return-date">Return Date (Optional):</label>
+				<input type="date" id="return-date" name="return-date"><br> 
+                
+                <button type="submit">Search</button>
+            </form>
+        </section>
+
+    </section>
+</body>
+</html>
