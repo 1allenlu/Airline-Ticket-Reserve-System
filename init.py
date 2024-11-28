@@ -57,37 +57,56 @@ def loginAuth():
 		return render_template('login.html', error=error)
 
 #Authenticates the register
-@app.route('/register1Auth', methods=['GET', 'POST'])
-def registerAuth():
-	#grabs information from the forms
-	username = request.form['username']
-	password = request.form['password']
+@app.route('/register1Auth', methods=['POST'])
+def register1Auth():
+    # Collect form data
+    email = request.form['email']
+    thepassword = request.form['thepassword']
+    first_name = request.form['first_name']
+    last_name = request.form['last_name']
+    building_num = request.form['building_num']
+    street_name = request.form['street_name']
+    apt_num = request.form['apt_num']
+    city = request.form['city']
+    state_name = request.form['state_name']
+    zip_code = request.form['zip_code']
+    passport_number = request.form['passport_number']
+    passport_expiration = request.form['passport_expiration']
+    passport_country = request.form['passport_country']
+    date_of_birth = request.form['date_of_birth']
 
-	#cursor used to send queries
-	cursor = conn.cursor()
-	#executes query
-	query = 'SELECT * FROM user WHERE username = %s'
-	cursor.execute(query, (username))
-	#stores the results in a variable
-	data = cursor.fetchone()
-	#use fetchall() if you are expecting more than 1 data row
-	error = None
-	if(data):
-		#If the previous query returns data, then user exists
-		error = "This customer already exists"
-		return render_template('customer_register.html', error = error)
-	else:
-		ins = 'INSERT INTO Customer VALUES(%s, %s)'
-		cursor.execute(ins, (username, password))
-		conn.commit()
-		cursor.close()
-		return render_template('index.html')
+    
+    cursor = conn.cursor()
+    query = 'SELECT * FROM Customer WHERE email = %s'
+    cursor.execute(query, (email,))
+    data = cursor.fetchone()
+    error = None
+
+    if data:
+        error = "This customer already exists"
+        return render_template('customer_register.html', error=error)
+    else:
+        ins = '''
+        INSERT INTO Customer (
+            email, thepassword, first_name, last_name, building_num, street_name, apt_num,
+            city, state_name, zip_code, passport_number, passport_expiration,
+            passport_country, date_of_birth
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        '''
+        cursor.execute(ins, (
+            email, thepassword, first_name, last_name, building_num, street_name, apt_num,
+            city, state_name, zip_code, passport_number, passport_expiration,
+            passport_country, date_of_birth
+        ))
+        conn.commit()
+        cursor.close()
+        return redirect(url_for('hello'))
 
 @app.route('/register2Auth', methods=['GET', 'POST'])
 def register2Auth():
 	#grabs information from the forms
 	username = request.form['username']
-	password = request.form['password']
+	thepassword = request.form['password']
 
 	#cursor used to send queries
 	cursor = conn.cursor()
@@ -104,7 +123,7 @@ def register2Auth():
 		return render_template('customer_register.html', error = error)
 	else:
 		ins = 'INSERT INTO Customer VALUES(%s, %s)'
-		cursor.execute(ins, (username, password))
+		cursor.execute(ins, (username, thepassword))
 		conn.commit()
 		cursor.close()
 		return render_template('index.html')
