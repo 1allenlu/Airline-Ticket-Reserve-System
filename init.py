@@ -25,9 +25,9 @@ def login():
 	return render_template('login.html')
 
 #Define route for register
-@app.route('/register')
+@app.route('/register1')
 def register():
-	return render_template('register.html')
+	return render_template('customer_register.html')
 
 #Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])
@@ -57,7 +57,7 @@ def loginAuth():
 		return render_template('login.html', error=error)
 
 #Authenticates the register
-@app.route('/registerAuth', methods=['GET', 'POST'])
+@app.route('/register1Auth', methods=['GET', 'POST'])
 def registerAuth():
 	#grabs information from the forms
 	username = request.form['username']
@@ -74,10 +74,36 @@ def registerAuth():
 	error = None
 	if(data):
 		#If the previous query returns data, then user exists
-		error = "This user already exists"
-		return render_template('register.html', error = error)
+		error = "This customer already exists"
+		return render_template('customer_register.html', error = error)
 	else:
-		ins = 'INSERT INTO user VALUES(%s, %s)'
+		ins = 'INSERT INTO Customer VALUES(%s, %s)'
+		cursor.execute(ins, (username, password))
+		conn.commit()
+		cursor.close()
+		return render_template('index.html')
+
+@app.route('/register2Auth', methods=['GET', 'POST'])
+def register2Auth():
+	#grabs information from the forms
+	username = request.form['username']
+	password = request.form['password']
+
+	#cursor used to send queries
+	cursor = conn.cursor()
+	#executes query
+	query = 'SELECT * FROM user WHERE username = %s'
+	cursor.execute(query, (username))
+	#stores the results in a variable
+	data = cursor.fetchone()
+	#use fetchall() if you are expecting more than 1 data row
+	error = None
+	if(data):
+		#If the previous query returns data, then user exists
+		error = "This customer already exists"
+		return render_template('customer_register.html', error = error)
+	else:
+		ins = 'INSERT INTO Customer VALUES(%s, %s)'
 		cursor.execute(ins, (username, password))
 		conn.commit()
 		cursor.close()
@@ -113,15 +139,17 @@ def logout():
 	return redirect('/')
 
 
+@app.route('/customer_register')
+def customer_register():
+    return render_template('customer_register.html')
+
+@app.route('/staff_register')
+def staff_register():
+    return render_template('staff_register.html')
+
 @app.route('/search-flights', methods=['GET'])
 def searchFlights():
     # Get form data
-    # source_city = request.form['source-city']
-    # source_airport = request.form['departure-airport']
-    # destination_city = request.args.form['destination-city']
-    # destination_airport = request.form['destination-airport']
-    # departure_date = request.args.form['departure-date']
-    # return_date = request.form['return-date']  # Optional
     source_city = request.args.get('source-city')
     source_airport = request.args.get('departure-airport')
     destination_city = request.args.get('destination-city')
@@ -143,7 +171,7 @@ def searchFlights():
         a1.city AS departure_city,
         a2.airport_name AS destination_airport,
         a2.city AS destination_city
-    FROM 
+    FROM l
         Flight AS f
     JOIN 
         Airport AS a1 ON f.departure_airport_code = a1.airport_code
