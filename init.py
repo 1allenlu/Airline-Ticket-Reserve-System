@@ -30,31 +30,66 @@ def register():
 	return render_template('customer_register.html')
 
 #Authenticates the login
-@app.route('/loginAuth', methods=['GET', 'POST'])
-def loginAuth():
-	#grabs information from the forms
-	username = request.form['username']
-	password = request.form['password']
+# @app.route('/loginAuth', methods=['GET', 'POST'])
+# def loginAuth():
+# 	#grabs information from the forms
+# 	username = request.form['username']
+# 	password = request.form['password']
 
-	#cursor used to send queries
-	cursor = conn.cursor()
-	#executes query
-	query = 'SELECT * FROM user WHERE username = %s and password = %s'
-	cursor.execute(query, (username, password))
-	#stores the results in a variable
-	data = cursor.fetchone()
-	#use fetchall() if you are expecting more than 1 data row
-	cursor.close()
-	error = None
-	if(data):
-		#creates a session for the the user
-		#session is a built in
-		session['username'] = username
-		return redirect(url_for('home'))
-	else:
-		#returns an error message to the html page
-		error = 'Invalid login or username'
-		return render_template('login.html', error=error)
+# 	#cursor used to send queries
+# 	cursor = conn.cursor()
+# 	#executes query
+# 	query = 'SELECT * FROM Customer WHERE email = %s AND thepassword = %s'
+# 	cursor.execute(query, (username, password))
+# 	#stores the results in a variable
+# 	data = cursor.fetchone()
+# 	#use fetchall() if you are expecting more than 1 data row
+# 	cursor.close()
+# 	error = None
+# 	if(data):
+# 		#creates a session for the the user
+# 		#session is a built in
+# 		session['username'] = username
+# 		return redirect(url_for('customer_page'))
+# 	else:
+# 		#returns an error message to the html page
+# 		error = 'Invalid login or username'
+# 		return render_template('login.html', error=error)
+
+@app.route('/loginAuth', methods=['POST'])
+def loginAuth():
+    # Get the login type (customer or staff)
+    login_type = request.form['login_type']
+    password = request.form['password']
+    cursor = conn.cursor()
+
+    if login_type == 'customer':
+        # Customer login uses 'email' field
+        email = request.form['email']
+        query = 'SELECT * FROM Customer WHERE email = %s AND thepassword = %s'
+        cursor.execute(query, (email, password))
+        data = cursor.fetchone()
+        if data:
+            session['username'] = email
+            session['user_type'] = 'customer'
+            return redirect(url_for('customer_page'))
+
+    elif login_type == 'staff':
+        # Airline staff login uses 'username' field
+        username = request.form['username']
+        query = 'SELECT * FROM Airline_Staff WHERE username = %s AND thepassword = %s'
+        cursor.execute(query, (username, password))
+        data = cursor.fetchone()
+        if data:
+            session['username'] = username
+            session['user_type'] = 'staff'
+            return redirect(url_for('staff_page'))
+
+    cursor.close()
+
+    # If login fails
+    error = 'Invalid login credentials'
+    return render_template('login.html', error=error)
 
 #Authenticates the register
 @app.route('/register1Auth', methods=['POST'])
@@ -157,6 +192,9 @@ def logout():
 	session.pop('username')
 	return redirect('/')
 
+@app.route('/customerpage')
+def customer_page():
+    return render_template('customer_page.html')
 
 @app.route('/customer_register')
 def customer_register():
