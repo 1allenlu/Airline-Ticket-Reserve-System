@@ -29,33 +29,6 @@ def login():
 def register():
 	return render_template('customer_register.html')
 
-#Authenticates the login
-# @app.route('/loginAuth', methods=['GET', 'POST'])
-# def loginAuth():
-# 	#grabs information from the forms
-# 	username = request.form['username']
-# 	password = request.form['password']
-
-# 	#cursor used to send queries
-# 	cursor = conn.cursor()
-# 	#executes query
-# 	query = 'SELECT * FROM Customer WHERE email = %s AND thepassword = %s'
-# 	cursor.execute(query, (username, password))
-# 	#stores the results in a variable
-# 	data = cursor.fetchone()
-# 	#use fetchall() if you are expecting more than 1 data row
-# 	cursor.close()
-# 	error = None
-# 	if(data):
-# 		#creates a session for the the user
-# 		#session is a built in
-# 		session['username'] = username
-# 		return redirect(url_for('customer_page'))
-# 	else:
-# 		#returns an error message to the html page
-# 		error = 'Invalid login or username'
-# 		return render_template('login.html', error=error)
-
 @app.route('/loginAuth', methods=['POST'])
 def loginAuth():
     # Get the login type (customer or staff)
@@ -206,53 +179,229 @@ def staff_register():
 
 @app.route('/search-flights', methods=['GET'])
 def searchFlights():
-    # Get form data
-    source_city = request.args.get('source-city')
+    # Validate required inputs
     source_airport = request.args.get('departure-airport')
-    destination_city = request.args.get('destination-city')
     destination_airport = request.args.get('destination-airport')
     departure_date = request.args.get('departure-date')
     return_date = request.args.get('return-date')
 
-    # Construct the query
+    if not all([source_airport, destination_airport, departure_date]):
+        return "Required fields are missing.", 400
+
+    try:
+        # Parse dates
+        from datetime import datetime
+        departure_date = datetime.strptime(departure_date, '%Y-%m-%d').date()
+        return_date = datetime.strptime(return_date, '%Y-%m-%d').date() if return_date else None
+
+        # Construct query and parameters
+        query = '''
+        SELECT 
+            f.flight_number,
+            f.airline_name,
+            f.departure_datetime,
+            f.arrival_datetime,
+            f.base_price,
+            f.flight_status,
+            a1.airport_name AS departure_airport,
+            a1.city AS departure_city,
+            a2.airport_name AS destination_airport,
+            a2.city AS destination_city
+        FROM 
+            Flight AS f
+        JOIN 
+            Airport AS a1 ON f.departure_airport_code = a1.airport_code
+        JOIN 
+            Airport AS a2 ON f.arrival_airport_code = a2.airport_code
+        WHERE 
+            a1.airport_name = %s
+            AND a2.airport_name = %s
+            AND DATE(f.departure_datetime) >= %s
+        '''
+        params = [source_airport, destination_airport, departure_date]
+
+        if return_date:
+            query += " AND DATE(f.departure_datetime) <= %s"
+            params.append(return_date)
+
+        # Execute query
+        cursor = conn.cursor()
+        cursor.execute(query, params)
+        flights = cursor.fetchall()
+        cursor.close()
+
+        return render_template('search_results.html', flights=flights)
+
+    except Exception as e:
+        print(f"Error during flight search: {e}")
+        return "An error occurred during flight search."
+
+@app.route('/purchase-ticket', methods=['POST'])
+def purchase_ticket():
+    # Check if the user is logged in
+    customer_email = session.get('username')  # Customer email is stored in the session
+    if not customer_email:
+        return redirect(url_for('login'))  # Redirect to login if not logged in
+
+    # Get flight details from the form
+    flight_number = request.form['flight_number']
+    departure_datetime = request.form['departure_datetime']
+    base_price = request.form['base_price']
+
+    # Insert the ticket into the database
     cursor = conn.cursor()
-    query = '''
-    SELECT 
-        f.flight_number,
-        f.airline_name,
-        f.departure_datetime,
-        f.arrival_datetime,
-        f.base_price,
-        f.flight_status,
-        a1.airport_name AS departure_airport,
-        a1.city AS departure_city,
-        a2.airport_name AS destination_airport,
-        a2.city AS destination_city
-    FROM l
-        Flight AS f
-    JOIN 
-        Airport AS a1 ON f.departure_airport_code = a1.airport_code
-    JOIN 
-        Airport AS a2 ON f.arrival_airport_code = a2.airport_code
-    WHERE 
-        a1.city = %s AND a1.airport_name = %s
-        AND a2.city = %s AND a2.airport_name = %s
-        AND f.departure_datetime >= %s
-    '''
-    # If return date is provided, add it to the query (optional)
-    params = [source_city, source_airport, destination_city, destination_airport, departure_date]
-    if return_date:
-        query += " AND return_date = %s"
-        params.append(return_date)
+    try:
+        # Check if the flight exists
+        query = 'SELECT * FROM Flight WHERE flight_number = %s AND departure_datetime = %s'
+        cursor.execute(query, (flight_number, departure_datetime))
+        flight = cursor.fetchone()
+        if not flight:
+            return "Flight not found", 404
 
-    # Execute the query
-    cursor.execute(query, params)
-    flights = cursor.fetchall()
-    cursor.close()
+        # Insert ticket into the Ticket table
+        insert_ticket_query = '''
+        INSERT INTO Ticket (customer_email, flight_number, purchase_date, price)
+        VALUES (%s, %s, NOW(), %s)
+        '''
+        cursor.execute(insert_ticket_query, (customer_email, flight_number, base_price))
+        conn.commit()
 
-    # Pass results to the template
-    return render_template('search_results.html', flights=flights)
-		
+        return render_template('purchase_success.html', flight=flight)
+    except Exception as e:
+        print("Error during ticket purchase:", e)
+        return "An error occurred while purchasing the ticket.", 500
+    finally:
+        cursor.close()
+  
+# @app.route('/purchase-process', methods=['POST'])
+# def purchase_process():
+#     # Get flight details from the form
+#     flight_details = {
+#         'flight_number': request.form['flight_number'],
+#         'departure_datetime': request.form['departure_datetime'],
+#         'base_price': request.form['base_price'],
+#         'airline_name': request.form['airline_name'],
+#         'departure_airport': request.form['departure_airport'],
+#         'destination_airport': request.form['destination_airport'],
+#     }
+
+#     # Ensure the user is logged in
+#     customer_email = session.get('username')
+#     if not customer_email:
+#         return redirect(url_for('index'))  # Redirect to login if not logged in
+
+#     # Pass flight details to the template
+#     return render_template('purchase_process.html', flight_details=flight_details)
+
+@app.route('/purchase-process', methods=['POST'])
+def purchase_process():
+    # Ensure the user is logged in
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    # Get flight details from the form
+    flight_details = {
+        'flight_number': request.form['flight_number'],
+        'departure_datetime': request.form['departure_datetime'],
+        'base_price': request.form['base_price'],
+        'airline_name': request.form['airline_name'],
+        'departure_airport': request.form['departure_airport'],
+        'destination_airport': request.form['destination_airport'],
+    }
+
+    # Pass flight details to the template
+    return render_template('purchase_process.html', flight_details=flight_details)
+
+# @app.route('/finalize-purchase', methods=['POST'])
+# def finalize_purchase():
+#     # Get purchase details from the form
+#     flight_number = request.form['flight_number']
+#     departure_datetime = request.form['departure_datetime']
+#     base_price = request.form['base_price']
+#     passenger_name = request.form['passenger_name']
+#     payment_method = request.form['payment_method']
+
+#     # Ensure the user is logged in
+#     customer_email = session.get('username')
+#     if not customer_email:
+#         return redirect(url_for('login'))  # Redirect to login if not logged in
+
+#     # Insert the ticket into the database
+#     cursor = conn.cursor()
+#     try:
+#         # Check if the flight exists
+#         query = 'SELECT * FROM Flight WHERE flight_number = %s AND departure_datetime = %s'
+#         cursor.execute(query, (flight_number, departure_datetime))
+#         flight = cursor.fetchone()
+#         if not flight:
+#             return "Flight not found", 404
+
+#         # Insert ticket into the Ticket table
+#         insert_ticket_query = '''
+#         INSERT INTO PURCHASE (customer_email, flight_number, passenger_name, purchase_date, price, payment_method)
+#         VALUES (%s, %s, %s, NOW(), %s, %s)
+#         '''
+#         cursor.execute(insert_ticket_query, (customer_email, flight_number, passenger_name, base_price, payment_method))
+#         conn.commit()
+
+#         return render_template('purchase_success.html', flight=flight, passenger_name=passenger_name)
+#     except Exception as e:
+#         print("Error during ticket purchase:", e)
+#         return "An error occurred while purchasing the ticket.", 500
+#     finally:
+#         cursor.close()
+
+@app.route('/finalize-purchase', methods=['POST'])
+def finalize_purchase():
+    # Ensure the user is logged in
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    # Get data from the form
+    email = session['customer_email'] 
+    name_on_card = request.form['name_on_card']
+    card_number = request.form['card_number']
+    card_type = request.form['card_type']
+    card_expiration_date = request.form['card_expiration_date']
+    passenger_first_name = request.form['passenger_first_name']
+    passenger_last_name = request.form['passenger_last_name']
+    passenger_birth_date = request.form['passenger_birth_date']
+
+    try:
+        # Insert purchase data into the `purchase` table
+        cursor = conn.cursor()
+
+        # Construct the SQL INSERT query
+        insert_purchase_query = '''
+        INSERT INTO PURCHASE (
+            email, name_on_card, card_number, card_type, 
+            purchase_datetime, card_expiration_date, passenger_first_name, 
+            passenger_last_name, passenger_birthdate
+        )
+        VALUES (%s, %s, %s, %s, NOW(), %s, %s, %s, %s)
+        '''
+
+        # Execute the query with provided data
+        cursor.execute(insert_purchase_query, (
+            email, name_on_card, card_number, card_type, 
+            card_expiration_date, passenger_first_name, 
+            passenger_last_name, passenger_birth_date
+        ))
+
+        # Commit the transaction
+        conn.commit()
+
+        # Redirect to the success page
+        return render_template('purchase_success.html', flight_number=flight_number)
+
+    except Exception as e:
+        print(f"Error during purchase: {e}")
+        return "An error occurred while processing your purchase.", 500
+
+    finally:
+        # Close the cursor
+        cursor.close()
+
 app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000
 #debug = True -> you don't have to restart flask

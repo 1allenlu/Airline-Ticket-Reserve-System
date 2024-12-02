@@ -26,10 +26,10 @@ INSERT INTO Flight VALUES (300, '2024-11-13 12:05:20', 'Jet Blue', 123, 300, 'De
 INSERT INTO Flight VALUES (400, '2024-11-14 12:05:20', 'Jet Blue', 123, 300, 'Delayed', 2, 1, '2024-11-14 14:05:20');
 
 
-INSERT INTO Ticket VALUES (100, 500);
-INSERT INTO Ticket VALUES (101, 510);
-INSERT INTO Ticket VALUES (102, 520);
-INSERT INTO Ticket VALUES (103, 530);
+INSERT INTO Ticket VALUES (100, 100, '2024-11-05 12:05:20', 'Jet Blue', 500);
+INSERT INTO Ticket VALUES (101, 200, '2024-11-12 12:05:20', 'Jet Blue', 510);
+INSERT INTO Ticket VALUES (102, 300, '2024-11-13 12:05:20', 'Jet Blue', 520);
+INSERT INTO Ticket VALUES (103, 400, '2024-11-14 12:05:20', 'Jet Blue', 530);
 
 
 INSERT INTO Purchases VALUES (100, 'evannnnn@gmail.com', 'Evan Dworkin', '123123', 'credit', '2024-09-09 10:00:00', '2025-10-10', 'evan', 'dworking', '2005-08-31');

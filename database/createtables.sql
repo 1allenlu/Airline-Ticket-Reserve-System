@@ -53,11 +53,7 @@ PRIMARY KEY (airplane_id, airline_name, start_datetime, end_datetime)
 );
 
 
-CREATE TABLE Ticket (
-ticket_id int,
-calculated_ticket_price int,
-PRIMARY KEY (ticket_id)
-);
+
 
 
 CREATE TABLE Airport(
@@ -87,6 +83,15 @@ FOREIGN KEY (airline_name) REFERENCES Airline (airline_name),
 PRIMARY KEY(flight_number, departure_datetime, airline_name)
 );
 
+CREATE TABLE Ticket (
+ticket_id int,
+flight_number int,
+departure_datetime DATETIME, 
+airline_name VARCHAR(255), 
+calculated_ticket_price int,
+FOREIGN KEY (flight_number, departure_datetime, airline_name) REFERENCES Flight(flight_number, departure_datetime, airline_name), 
+PRIMARY KEY (ticket_id)
+);
 
 CREATE TABLE Customer(
 email VARCHAR(255),
