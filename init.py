@@ -293,13 +293,33 @@ def purchase_ticket():
 #     # Pass flight details to the template
 #     return render_template('purchase_process.html', flight_details=flight_details)
 
+# @app.route('/purchase-process', methods=['POST'])
+# def purchase_process():
+#     # Ensure the user is logged in
+#     if 'username' not in session:
+#         return redirect(url_for('login'))
+
+#     # Get flight details from the form
+#     flight_details = {
+#         'flight_number': request.form['flight_number'],
+#         'departure_datetime': request.form['departure_datetime'],
+#         'base_price': request.form['base_price'],
+#         'airline_name': request.form['airline_name'],
+#         'departure_airport': request.form['departure_airport'],
+#         'destination_airport': request.form['destination_airport'],
+#     }
+
+#     # Pass flight details to the template
+#     return render_template('purchase_process.html', flight_details=flight_details)
+
+
 @app.route('/purchase-process', methods=['POST'])
 def purchase_process():
     # Ensure the user is logged in
     if 'username' not in session:
         return redirect(url_for('login'))
 
-    # Get flight details from the form
+    # Get flight details from the form (hidden inputs)
     flight_details = {
         'flight_number': request.form['flight_number'],
         'departure_datetime': request.form['departure_datetime'],
@@ -309,7 +329,7 @@ def purchase_process():
         'destination_airport': request.form['destination_airport'],
     }
 
-    # Pass flight details to the template
+    # Pass flight details to the purchase form
     return render_template('purchase_process.html', flight_details=flight_details)
 
 # @app.route('/finalize-purchase', methods=['POST'])
@@ -351,14 +371,68 @@ def purchase_process():
 #     finally:
 #         cursor.close()
 
+# @app.route('/finalize-purchase', methods=['POST'])
+# def finalize_purchase():
+#     # Ensure the user is logged in
+#     if 'username' not in session:
+#         return redirect(url_for('login'))
+
+#     # Get data from the form
+#     email = session['customer_email'] 
+#     name_on_card = request.form['name_on_card']
+#     card_number = request.form['card_number']
+#     card_type = request.form['card_type']
+#     card_expiration_date = request.form['card_expiration_date']
+#     passenger_first_name = request.form['passenger_first_name']
+#     passenger_last_name = request.form['passenger_last_name']
+#     passenger_birth_date = request.form['passenger_birth_date']
+
+#     try:
+#         # Insert purchase data into the `purchase` table
+#         cursor = conn.cursor()
+
+#         # Construct the SQL INSERT query
+#         insert_purchase_query = '''
+#         INSERT INTO PURCHASE (
+#             email, name_on_card, card_number, card_type, 
+#             purchase_datetime, card_expiration_date, passenger_first_name, 
+#             passenger_last_name, passenger_birthdate
+#         )
+#         VALUES (%s, %s, %s, %s, NOW(), %s, %s, %s, %s)
+#         '''
+
+#         # Execute the query with provided data
+#         cursor.execute(insert_purchase_query, (
+#             email, name_on_card, card_number, card_type, 
+#             card_expiration_date, passenger_first_name, 
+#             passenger_last_name, passenger_birth_date
+#         ))
+#         # Commit the transaction
+#         conn.commit()
+
+#         # Redirect to the success page
+#         return render_template('purchase_success.html', flight_number=flight_number)
+
+#     except Exception as e:
+#         print(f"Error during purchase: {e}")
+#         return "An error occurred while processing your purchase.", 500
+
+#     finally:
+#         # Close the cursor
+#         cursor.close()
+
 @app.route('/finalize-purchase', methods=['POST'])
 def finalize_purchase():
     # Ensure the user is logged in
     if 'username' not in session:
         return redirect(url_for('login'))
 
-    # Get data from the form
+    # Extract purchase details
     email = session['customer_email'] 
+    flight_number = request.form['flight_number']
+    departure_datetime = request.form['departure_datetime']
+    base_price = request.form['base_price']
+    airline_name = request.form['airline_name']
     name_on_card = request.form['name_on_card']
     card_number = request.form['card_number']
     card_type = request.form['card_type']
@@ -368,22 +442,30 @@ def finalize_purchase():
     passenger_birth_date = request.form['passenger_birth_date']
 
     try:
-        # Insert purchase data into the `purchase` table
         cursor = conn.cursor()
 
-        # Construct the SQL INSERT query
-        insert_purchase_query = '''
-        INSERT INTO PURCHASE (
-            email, name_on_card, card_number, card_type, 
-            purchase_datetime, card_expiration_date, passenger_first_name, 
-            passenger_last_name, passenger_birthdate
-        )
-        VALUES (%s, %s, %s, %s, NOW(), %s, %s, %s, %s)
+        # Step 1: Insert into the `Ticket` table
+        insert_ticket_query = '''
+        INSERT INTO Ticket (
+            calculated_ticket_price, airline_name, departure_datetime, flight_number
+        ) VALUES (%s, %s, %s, %s)
         '''
+        cursor.execute(insert_ticket_query, (base_price, airline_name, departure_datetime, flight_number))
 
-        # Execute the query with provided data
+        # Get the generated ticket_id
+        ticket_id = cursor.lastrowid
+
+        # Step 2: Insert into the `Purchases` table
+        insert_purchase_query = '''
+        INSERT INTO Purchases (
+            ticket_id, email, name_on_card, card_number, card_type, 
+            purchase_datetime, card_expiration_date, passenger_first_name, 
+            passenger_last_name, passenger_birthofdate
+        )
+        VALUES (%s, %s, %s, %s, %s, NOW(), %s, %s, %s, %s)
+        '''
         cursor.execute(insert_purchase_query, (
-            email, name_on_card, card_number, card_type, 
+            ticket_id, email, name_on_card, card_number, card_type,
             card_expiration_date, passenger_first_name, 
             passenger_last_name, passenger_birth_date
         ))
@@ -392,14 +474,13 @@ def finalize_purchase():
         conn.commit()
 
         # Redirect to the success page
-        return render_template('purchase_success.html', flight_number=flight_number)
+        return render_template('purchase_success.html', ticket_id=ticket_id)
 
     except Exception as e:
         print(f"Error during purchase: {e}")
         return "An error occurred while processing your purchase.", 500
 
     finally:
-        # Close the cursor
         cursor.close()
 
 app.secret_key = 'some key that you will never guess'
