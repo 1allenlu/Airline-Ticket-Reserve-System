@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Change Flight Status</title>
+    <script>
+        function toggleDelayInput() {
+            const status = document.getElementById('new_status').value;
+            const delayInput = document.getElementById('delay_input');
+            delayInput.style.display = (status === 'delayed') ? 'block' : 'none';
+        }
+    </script>
+</head>
+<body>
+    <h1>Change Flight Status</h1>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+    <form method="POST">
+        <label for="flight_number">Flight Number:</label>
+        <input type="text" id="flight_number" name="flight_number" required><br><br>
+        <label for="new_status">New Status:</label>
+        <select id="new_status" name="new_status" onchange="toggleDelayInput()" required>
+            <option value="on-time">On-Time</option>
+            <option value="delayed">Delayed</option>
+        </select><br><br>
+        <div id="delay_input" style="display:none;">
+            <label for="delay_minutes">Delay Duration (Minutes):</label>
+            <input type="number" id="delay_minutes" name="delay_minutes" min="1"><br><br>
+        </div>
+        <button type="submit">Change Status</button>
+    </form>
+    <a href="/staffHome">Back to Staff Home</a>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Schedule Maintenance</title>
+</head>
+<body>
+    <h1>Schedule Maintenance</h1>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+    <form method="POST">
+        <label for="airplane_id">Airplane ID:</label>
+        <input type="text" id="airplane_id" name="airplane_id" required><br><br>
+        <label for="start_datetime">Start Date & Time:</label>
+        <input type="datetime-local" id="start_datetime" name="start_datetime" required><br><br>
+        <label for="end_datetime">End Date & Time:</label>
+        <input type="datetime-local" id="end_datetime" name="end_datetime" required><br><br>
+        <button type="submit">Schedule Maintenance</button>
+    </form>
+    <a href="/staffHome">Back to Staff Home</a>
+</body>
+</html>

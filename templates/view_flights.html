@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Flights</title>
+</head>
+<body>
+    <h1>View Flights</h1>
+    <form method="POST">
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" required>
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" required>
+        <label for="source_city">Source City:</label>
+        <input type="text" id="source_city" name="source_city">
+        <label for="destination_city">Destination City:</label>
+        <input type="text" id="destination_city" name="destination_city">
+        <button type="submit">Filter</button>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>Flight Number</th>
+                <th>Departure</th>
+                <th>Arrival</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for flight in flights %}
+            <tr>
+                <td>{{ flight.flight_number }}</td>
+                <td>{{ flight.departure_datetime }}</td>
+                <td>{{ flight.arrival_datetime }}</td>
+                <td>{{ flight.flight_status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/staffHome">Back</a>
+</body>
+</html>

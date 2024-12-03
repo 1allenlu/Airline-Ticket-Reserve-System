@@ -2,34 +2,78 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="staff_page">
-    <title>Staff Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Home</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px 10px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .button-container button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .button-container button:hover {
+            background-color: #0056b3;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-    <section id="staff-use-cases">
-        <h1>Staff Page</h1>
-        <button type="submit">View My Flights</button> 
-        
-        <section id="flight-search">
-            <h2>Search for Flights</h2>
-            <form action="/search-flights" method="GET">
-
-				<label for="departure-airport">Departure Airport:</label>
-				<input type="text" id="departure-airport" name="departure-airport" required><br> 
-
-				<label for="destination-airport">Destination Airport:</label>
-				<input type="text" id="destination-airport" name="destination-airport" required><br> 
-
-				<label for="departure-date">Departure Date:</label>
-				<input type="date" id="departure-date" name="departure-date" required><br> 
-
-				<label for="return-date">Return Date (Optional):</label>
-				<input type="date" id="return-date" name="return-date"><br> 
-                
-                <button type="submit">Search</button>
-            </form>
-        </section>
-
-    </section>
+    <header>
+        <h1>Welcome, Airline Staff</h1>
+    </header>
+    <main>
+        <div class="button-container">
+            <button onclick="location.href='/viewFlights'">View Flights</button>
+            <button onclick="location.href='/createFlight'">Create New Flight</button>
+            <button onclick="location.href='/changeFlightStatus'">Change Flight Status</button>
+            <button onclick="location.href='/addAirplane'">Add Airplane</button>
+            <button onclick="location.href='/addAirport'">Add Airport</button>
+            <button onclick="location.href='/viewFlightRatings'">View Flight Ratings</button>
+            <button onclick="location.href='/scheduleMaintenance'">Schedule Maintenance</button>
+            <button onclick="location.href='/viewFrequentCustomers'">View Frequent Customers</button>
+            <button onclick="location.href='/viewRevenue'">View Earned Revenue</button>
+            <button onclick="location.href='/logout'">Logout</button>
+        </div>
+    </main>
+    <footer>
+        <p>aiden lee and allen lu</p>
+    </footer>
 </body>
 </html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Flight Ratings</title>
+</head>
+<body>
+    <h1>Flight Ratings</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Flight Number</th>
+                <th>Average Rating</th>
+                <th>Comments</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rating in ratings %}
+            <tr>
+                <td>{{ rating.flight_number }}</td>
+                <td>{{ rating.average_rating }}</td>
+                <td>{{ rating.comments }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/staffHome">Back to Staff Home</a>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Frequent Customers</title>
+</head>
+<body>
+    <h1>Most Frequent Customer</h1>
+    {% if frequent_customer %}
+        <p>Email: {{ frequent_customer.email }}</p>
+        <p>Number of Flights: {{ frequent_customer.flight_count }}</p>
+    {% else %}
+        <p>No frequent customers found for the last year.</p>
+    {% endif %}
+    <a href="/staffHome">Back to Staff Home</a>
+</body>
+</html>
