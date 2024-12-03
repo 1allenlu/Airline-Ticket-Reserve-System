@@ -1,15 +1,41 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airline Staff Registration</title>
 </head>
 <body>
-<form action="/register2Auth" method="POST">
-	<input type="text" name = "username" placeholder="username" required/> </br>
-	<input type="password" name = "password" placeholder="password" required/></br>
-	<input type="submit" value = Register />
-	{% if error %}
-		<p class="error"><strong>Error:</strong> {{error}}</p>
-	{% endif %}
-</form>
-<a href="/">Go back</a>
+    <h1>Airline Staff Registration</h1>
+
+    <!-- Display error message if any -->
+    {% if error %}
+        <p class="error"><strong>Error:</strong> {{ error }}</p>
+    {% endif %}
+
+    <form action="/register2Auth" method="POST">
+        <label for="username">Username:</label><br>
+        <input type="username" id="username" name="username" required><br><br>
+
+        <label for="thepassword">Password:</label><br>
+        <input type="password" id="thepassword" name="thepassword" required><br><br>
+
+        <label for="airline_name">Airline Name:</label><br>
+        <input type="text" id="airline_name" name="airline_name" required><br><br>
+
+        <label for="first_name">First Name:</label><br>
+        <input type="text" id="first_name" name="first_name" required><br><br>
+
+        <label for="last_name">Last Name:</label><br>
+        <input type="text" id="last_name" name="last_name" required><br><br>
+
+        <label for="date_of_birth">Date of Birth:</label><br>
+        <input type="date" id="date_of_birth" name="date_of_birth" required><br><br>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <!-- Add 'Go back' link -->
+    <a href="/">Go back</a>
 </body>
 </html>

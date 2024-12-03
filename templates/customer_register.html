@@ -7,6 +7,12 @@
 </head>
 <body>
     <h1>Customer Registration</h1>
+
+    <!-- Display error message if any -->
+    {% if error %}
+        <p class="error"><strong>Error:</strong> {{ error }}</p>
+    {% endif %}
+
     <form action="/register1Auth" method="POST">
         <label for="email">Email:</label><br>
         <input type="email" id="email" name="email" required><br><br>
@@ -53,6 +59,7 @@
         <button type="submit">Register</button>
     </form>
 
-    <p>Already registered? <a href="/login">Login here</a>.</p>
+    <!-- Add 'Go back' link -->
+    <a href="/">Go back</a>
 </body>
 </html>

@@ -1,5 +1,6 @@
 #Import Flask Library
 from flask import Flask, render_template, request, session, url_for, redirect
+from hashlib import md5
 import pymysql.cursors
 
 #Initialize the app from Flask
@@ -19,50 +20,67 @@ conn = pymysql.connect(host='127.0.0.1',
 def hello():
 	return render_template('index.html')
 
-#Define route for login
-@app.route('/login')
-def login():
-	return render_template('login.html')
+# #Define route for login
+# @app.route('/login')
+# def login():
+# 	return render_template('login.html')
 
 #Define route for register
 @app.route('/register1')
 def register():
 	return render_template('customer_register.html')
 
-@app.route('/loginAuth', methods=['POST'])
-def loginAuth():
-    # Get the login type (customer or staff)
-    login_type = request.form['login_type']
+@app.route('/login1Auth', methods=['POST'])
+def login1Auth():
+    # Collect form data
+    email = request.form['email']
     password = request.form['password']
+    hashed_password = md5(password.encode()).hexdigest()
+
     cursor = conn.cursor()
 
-    if login_type == 'customer':
-        # Customer login uses 'email' field
-        email = request.form['email']
-        query = 'SELECT * FROM Customer WHERE email = %s AND thepassword = %s'
-        cursor.execute(query, (email, password))
-        data = cursor.fetchone()
-        if data:
-            session['username'] = email
-            session['user_type'] = 'customer'
-            return redirect(url_for('customer_page'))
-
-    elif login_type == 'staff':
-        # Airline staff login uses 'username' field
-        username = request.form['username']
-        query = 'SELECT * FROM Airline_Staff WHERE username = %s AND thepassword = %s'
-        cursor.execute(query, (username, password))
-        data = cursor.fetchone()
-        if data:
-            session['username'] = username
-            session['user_type'] = 'staff'
-            return redirect(url_for('staff_page'))
-
+    # Query for customer login
+    query = 'SELECT * FROM Customer WHERE email = %s AND thepassword = %s'
+    cursor.execute(query, (email, hashed_password))
+    customer_data = cursor.fetchone()
     cursor.close()
 
-    # If login fails
-    error = 'Invalid login credentials'
-    return render_template('login.html', error=error)
+    if customer_data:
+        # Login successful
+        session['username'] = email
+        session['user_type'] = 'customer'
+        return redirect(url_for('customer_page'))
+    else:
+        # Login failed
+        error = "Invalid customer login credentials"
+        return render_template('index.html', error=error)
+    
+
+@app.route('/login2Auth', methods=['POST'])
+def login2Auth():
+    # Collect form data
+    username = request.form['username']
+    password = request.form['password']
+    hashed_password = md5(password.encode()).hexdigest()
+
+    cursor = conn.cursor()
+
+    # Query for staff login
+    query = 'SELECT * FROM Airline_Staff WHERE username = %s AND thepassword = %s'
+    cursor.execute(query, (username, hashed_password))
+    staff_data = cursor.fetchone()
+    cursor.close()
+
+    if staff_data:
+        # Login successful
+        session['username'] = username
+        session['user_type'] = 'staff'
+        return render_template('staff_page.html')
+    else:
+        # Login failed
+        error = "Invalid staff login credentials"
+        return render_template('index.html', error=error)
+
 
 #Authenticates the register
 @app.route('/register1Auth', methods=['POST'])
@@ -83,7 +101,9 @@ def register1Auth():
     passport_country = request.form['passport_country']
     date_of_birth = request.form['date_of_birth']
 
-    
+    hashed_password = md5(thepassword.encode()).hexdigest()
+
+
     cursor = conn.cursor()
     query = 'SELECT * FROM Customer WHERE email = %s'
     cursor.execute(query, (email,))
@@ -102,7 +122,7 @@ def register1Auth():
         ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         '''
         cursor.execute(ins, (
-            email, thepassword, first_name, last_name, building_num, street_name, apt_num,
+            email, hashed_password, first_name, last_name, building_num, street_name, apt_num,
             city, state_name, zip_code, passport_number, passport_expiration,
             passport_country, date_of_birth
         ))
@@ -110,31 +130,60 @@ def register1Auth():
         cursor.close()
         return redirect(url_for('hello'))
 
-@app.route('/register2Auth', methods=['GET', 'POST'])
-def register2Auth():
-	#grabs information from the forms
-	username = request.form['username']
-	thepassword = request.form['password']
 
-	#cursor used to send queries
-	cursor = conn.cursor()
-	#executes query
-	query = 'SELECT * FROM user WHERE username = %s'
-	cursor.execute(query, (username))
-	#stores the results in a variable
-	data = cursor.fetchone()
-	#use fetchall() if you are expecting more than 1 data row
-	error = None
-	if(data):
-		#If the previous query returns data, then user exists
-		error = "This customer already exists"
-		return render_template('customer_register.html', error = error)
-	else:
-		ins = 'INSERT INTO Customer VALUES(%s, %s)'
-		cursor.execute(ins, (username, thepassword))
-		conn.commit()
-		cursor.close()
-		return render_template('index.html')
+@app.route('/register2Auth', methods=['POST'])
+def register2Auth():
+    # Collect form data
+    username = request.form['username']
+    thepassword = request.form['thepassword']
+    airline_name = request.form['airline_name']
+    first_name = request.form['first_name']
+    last_name = request.form['last_name']
+    date_of_birth = request.form['date_of_birth']
+
+    # Hash the password
+    hashed_password = md5(thepassword.encode()).hexdigest()
+
+    cursor = conn.cursor()
+
+    # Check if the username already exists
+    query = 'SELECT * FROM Airline_Staff WHERE username = %s'
+    cursor.execute(query, (username,))
+    data = cursor.fetchone()
+    error = None
+
+    if data:
+        error = "This staff already exists"
+        return render_template('staff_register.html', error=error)
+    
+    # Ensure the airline exists
+    query_airline = 'SELECT * FROM Airline WHERE airline_name = %s'
+    cursor.execute(query_airline, (airline_name,))
+    airline_data = cursor.fetchone()
+
+    if not airline_data:
+        error = "Airline does not exist"
+        return render_template('staff_register.html', error=error)
+    
+    # Insert the new airline staff
+    ins = '''
+    INSERT INTO Airline_Staff (
+        username, thepassword, airline_name, first_name, last_name, date_of_birth
+    ) VALUES (%s, %s, %s, %s, %s, %s)
+    '''
+    try:
+        cursor.execute(ins, (
+            username, hashed_password, airline_name, first_name, last_name, date_of_birth
+        ))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        error = f"An error occurred: {e}"
+        return render_template('staff_register.html', error=error)
+    finally:
+        cursor.close()
+
+    return redirect(url_for('hello'))
 
 @app.route('/home')
 def home():
@@ -168,6 +217,10 @@ def logout():
 @app.route('/customerpage')
 def customer_page():
     return render_template('customer_page.html')
+
+@app.route('/staff_page')
+def staff_page():
+    return render_template('staff_page.html')
 
 @app.route('/customer_register')
 def customer_register():
