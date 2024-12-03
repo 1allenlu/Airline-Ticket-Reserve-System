@@ -84,11 +84,11 @@ PRIMARY KEY(flight_number, departure_datetime, airline_name)
 );
 
 CREATE TABLE Ticket (
-ticket_id int,
-flight_number int,
+ticket_id INT AUTO_INCREMENT,
+flight_number INT,
 departure_datetime DATETIME, 
 airline_name VARCHAR(255), 
-calculated_ticket_price int,
+calculated_ticket_price INT,
 FOREIGN KEY (flight_number, departure_datetime, airline_name) REFERENCES Flight(flight_number, departure_datetime, airline_name), 
 PRIMARY KEY (ticket_id)
 );
