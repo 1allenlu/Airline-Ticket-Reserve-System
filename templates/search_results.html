@@ -7,8 +7,10 @@
 </head>
 <body>
     <h1>Flight Search Results</h1>
-    
-    {% if flights %}
+
+    <!-- Departure Flights -->
+    <h2>Departure Flights</h2>
+    {% if departure_flights %}
     <table border="1">
         <thead>
             <tr>
@@ -26,7 +28,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for flight in flights %}
+            {% for flight in departure_flights %}
             <tr>
                 <td>{{ flight.flight_number }}</td>
                 <td>{{ flight.airline_name }}</td>
@@ -36,21 +38,21 @@
                 <td>{{ flight.destination_airport }}</td>
                 <td>{{ flight.departure_datetime }}</td>
                 <td>{{ flight.arrival_datetime }}</td>
-                <td>${{ flight.base_price }}</td>
+                <td>${{ flight.calculated_price }}</td>
                 <td>{{ flight.flight_status }}</td>
                 <td>
                     {% if session.username %}
-                        <form action="/purchase-process" method="POST">
-                            <input type="hidden" name="flight_number" value="{{ flight.flight_number }}">
-                            <input type="hidden" name="departure_datetime" value="{{ flight.departure_datetime }}">
-                            <input type="hidden" name="base_price" value="{{ flight.base_price }}">
-                            <input type="hidden" name="airline_name" value="{{ flight.airline_name }}">
-                            <input type="hidden" name="departure_airport" value="{{ flight.departure_airport }}">
-                            <input type="hidden" name="destination_airport" value="{{ flight.destination_airport }}">
-                            <button type="submit">Purchase Ticket</button>
-                        </form>
+                    <form action="/purchase-process" method="POST">
+                        <input type="hidden" name="flight_number" value="{{ flight.flight_number }}">
+                        <input type="hidden" name="departure_datetime" value="{{ flight.departure_datetime }}">
+                        <input type="hidden" name="calculated_price" value="{{ flight.calculated_price }}">
+                        <input type="hidden" name="airline_name" value="{{ flight.airline_name }}"> <!-- Ensure this field is included -->
+                        <input type="hidden" name="departure_airport" value="{{ flight.departure_airport }}">
+                        <input type="hidden" name="destination_airport" value="{{ flight.destination_airport }}">
+                        <button type="submit">Purchase Ticket</button>
+                    </form>
                     {% else %}
-                        <p>Please log in to purchase tickets.</p>
+                        <p>Please log in to purchase tickets. <a href="/">Go to Login Page</a></p>
                     {% endif %}
                 </td>
             </tr>
@@ -58,8 +60,65 @@
         </tbody>
     </table>
     {% else %}
-        <p>No flights match your search criteria.</p>
+        <p>No departure flights found for the selected date.</p>
     {% endif %}
+
+    <!-- Return Flights -->
+    <h2>Return Flights</h2>
+    {% if return_flights %}
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Flight Number</th>
+                <th>Airline Name</th>
+                <th>Departure City</th>
+                <th>Departure Airport</th>
+                <th>Destination City</th>
+                <th>Destination Airport</th>
+                <th>Departure Time</th>
+                <th>Arrival Time</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for flight in return_flights %}
+            <tr>
+                <td>{{ flight.flight_number }}</td>
+                <td>{{ flight.airline_name }}</td>
+                <td>{{ flight.departure_city }}</td>
+                <td>{{ flight.departure_airport }}</td>
+                <td>{{ flight.destination_city }}</td>
+                <td>{{ flight.destination_airport }}</td>
+                <td>{{ flight.departure_datetime }}</td>
+                <td>{{ flight.arrival_datetime }}</td>
+                <td>${{ flight.calculated_price }}</td>
+                <td>{{ flight.flight_status }}</td>
+                <td>
+                    {% if session.username %}
+                    <form action="/purchase-process" method="POST">
+                        <input type="hidden" name="flight_number" value="{{ flight.flight_number }}">
+                        <input type="hidden" name="departure_datetime" value="{{ flight.departure_datetime }}">
+                        <input type="hidden" name="calculated_price" value="{{ flight.calculated_price }}">
+                        <button type="submit">Purchase</button>
+                    </form>
+                    {% else %}
+                        <p>Please log in to purchase tickets. <a href="/">Go to Login Page</a></p>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No return flights found for the selected date.</p>
+    {% endif %}
+
+    {% if session.username %}
         <a href="/customerpage">Back to Customer Page</a>
+    {% else %}
+        <a href="/">Back to Login Page</a>
+    {% endif %}
 </body>
 </html>

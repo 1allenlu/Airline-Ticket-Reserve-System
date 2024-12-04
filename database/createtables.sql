@@ -53,9 +53,6 @@ PRIMARY KEY (airplane_id, airline_name, start_datetime, end_datetime)
 );
 
 
-
-
-
 CREATE TABLE Airport(
 airport_code int,
 airport_name VARCHAR(255),

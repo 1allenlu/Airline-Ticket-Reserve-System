@@ -1,0 +1,78 @@
+<h1>Track My Spending</h1>
+<h2>Total Spending in the Past Year: ${{ total_spent_year }}</h2>
+
+<h2>Month-wise Spending (Last 6 Months)</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Month</th>
+            <th>Amount Spent</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in month_data %}
+        <tr>
+            <td>{{ row['month'] }}</td>
+            <td>${{ row['total_spent'] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Specify a Date Range</h2>
+<form action="/track-spending" method="POST">
+    <label for="start_date">Start Date:</label>
+    <input type="date" id="start_date" name="start_date" required>
+
+    <label for="end_date">End Date:</label>
+    <input type="date" id="end_date" name="end_date" required>
+
+    <button type="submit">Submit</button>
+</form>
+
+{% if range_data %}
+<h2>Spending from {{ start_date }} to {{ end_date }}</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Month</th>
+            <th>Amount Spent</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in range_data %}
+        <tr>
+            <td>{{ row['month'] }}</td>
+            <td>${{ row['total_spent'] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endif %}
+
+<canvas id="spendingChart"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('spendingChart').getContext('2d');
+    const spendingChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ month_data | map(attribute='month') | list | tojson }},
+            datasets: [{
+                label: 'Spending ($)',
+                data: {{ month_data | map(attribute='total_spent') | list | tojson }},
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>

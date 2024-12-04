@@ -12,11 +12,11 @@
         <!-- Hidden Flight Details -->
         <input type="hidden" name="flight_number" value="{{ flight_details['flight_number'] }}">
         <input type="hidden" name="departure_datetime" value="{{ flight_details['departure_datetime'] }}">
-        <input type="hidden" name="base_price" value="{{ flight_details['base_price'] }}">
-        <input type="hidden" name="airline_name" value="{{ flight_details['airline_name'] }}">
-        <input type="hidden" name="departure_airport" value="{{ flight_details['departure_airport'] }}">
-        <input type="hidden" name="destination_airport" value="{{ flight_details['destination_airport'] }}">
-    
+        <input type="hidden" name="calculated_price" value="{{ flight_details['calculated_price'] }}">
+        <input type="hidden" name="airline_name" value="{{ flight_details['airline_name'] }}"> <!-- Added -->
+        <input type="hidden" name="departure_airport" value="{{ flight_details['departure_airport'] }}"> <!-- Added -->
+        <input type="hidden" name="destination_airport" value="{{ flight_details['destination_airport'] }}"> <!-- Added -->
+        
         <!-- Payment Details -->
         <label for="name_on_card">Name on Card:</label>
         <input type="text" id="name_on_card" name="name_on_card" required><br>
@@ -43,7 +43,6 @@
         <label for="passenger_birth_date">Passenger Birth Date:</label>
         <input type="date" id="passenger_birth_date" name="passenger_birth_date" required><br>
     
-        <!-- Submit -->
         <button type="submit">Confirm Purchase</button>
     </form>
 </body>

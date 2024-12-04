@@ -14,7 +14,7 @@
         <li>Departure Airport: {{ flight['departure_airport'] }}</li>
         <li>Destination Airport: {{ flight['destination_airport'] }}</li>
         <li>Departure Time: {{ flight['departure_datetime'] }}</li>
-        <li>Price: ${{ flight['base_price'] }}</li>
+        <li>Price: ${{ flight['calculated_price'] }}</li>
         <li>Payment Method: {{ payment_method }}</li>
     </ul>
     <a href="{{ url_for('customer_page') }}">Return to Customer Page</a>
