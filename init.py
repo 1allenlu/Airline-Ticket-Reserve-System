@@ -384,108 +384,176 @@ def finalize_purchase():
         except:
             pass
 
-# @app.route('/view-my-flights', methods=['GET'])
-# def view_my_flights():
-#     # Ensure the user is logged in
-#     if 'username' not in session:
-#         return redirect(url_for('login'))
-    
-#     try:
-#         # Get the user's email from the session
-#         email = session.get('username')
-        
-#         # Query to fetch tickets booked by the user for future flights
-#         query = '''
-#         SELECT 
-#             p.ticket_id,
-#             p.name_on_card,
-#             p.card_number,
-#             p.card_type,
-#             p.purchase_datetime,
-#             p.card_expiration_date,
-#             p.passenger_first_name,
-#             p.passenger_last_name,
-#             p.passenger_birthofdate,
-#             t.flight_number,
-#             t.departure_datetime,
-#             t.airline_name,
-#             t.calculated_ticket_price
-#         FROM 
-#             Purchases AS p
-#         JOIN 
-#             Ticket AS t ON p.ticket_id = t.ticket_id
-#         WHERE 
-#             p.email = %s AND t.departure_datetime > NOW()
-#         ORDER BY 
-#             t.departure_datetime ASC
-#         '''
-        
-#         # Execute the query
-#         cursor = conn.cursor()
-#         cursor.execute(query, (email,))
-#         flights = cursor.fetchall()
-#         cursor.close()
-        
-#         # Pass the flights data to the template
-#         return render_template('view_my_flights.html', flights=flights)
-
-#     except Exception as e:
-#         print(f"Error fetching flights: {e}")
-#         return "An error occurred while fetching your flights.", 500
-
-
 @app.route('/view-my-flights', methods=['GET'])
 def view_my_flights():
     # Ensure the user is logged in
     if 'username' not in session:
-        print("User not logged in. Redirecting to login page.")
         return redirect(url_for('login'))
-    
+
+    email = session['username']  # Retrieve the logged-in user's email
     try:
-        # Get the user's email from the session
-        email = session.get('username')
-        print(f"Fetching flights for user: {email}")
-        
-        # Query to fetch tickets booked by the user for future flights
+        cursor = conn.cursor()
+
+        # Fetch the user's purchased flights that are in the future
         query = '''
         SELECT 
-            p.ticket_id,
-            p.name_on_card,
-            p.card_number,
-            p.card_type,
-            p.purchase_datetime,
-            p.card_expiration_date,
-            p.passenger_first_name,
-            p.passenger_last_name,
-            p.passenger_birthofdate,
             t.flight_number,
             t.departure_datetime,
             t.airline_name,
-            t.calculated_ticket_price
+            t.calculated_ticket_price,
+            p.passenger_first_name,
+            p.passenger_last_name,
+            p.card_type,
+            t.ticket_id
         FROM 
-            Purchases AS p
+            Ticket AS t
         JOIN 
-            Ticket AS t ON p.ticket_id = t.ticket_id
+            Purchases AS p ON t.ticket_id = p.ticket_id
         WHERE 
             p.email = %s AND t.departure_datetime > NOW()
         ORDER BY 
-            t.departure_datetime ASC
+            t.departure_datetime;
         '''
-        
-        print("Executing query...")
-        # Execute the query
-        cursor = conn.cursor()
         cursor.execute(query, (email,))
         flights = cursor.fetchall()
-        cursor.close()
-        print(f"Flights retrieved: {flights}")
 
-        # Pass the flights data to the template
+        cursor.close()
+
+        # Render the view_my_flights.html template with the fetched data
         return render_template('view_my_flights.html', flights=flights)
 
     except Exception as e:
         print(f"Error fetching flights: {e}")
-        return f"An error occurred while fetching your flights: {e}", 500
+        return "An error occurred while fetching your flights.", 500
+
+@app.route('/cancel-trip', methods=['POST'])
+def cancel_trip():
+    # Ensure the user is logged in
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        cursor = conn.cursor()
+        email = session['username']  # Logged-in user's email
+        ticket_id = request.form['ticket_id']  # Ticket ID from the form
+
+        # Step 1: Verify the ticket belongs to the logged-in user and is in the future
+        verify_ticket_query = '''
+        SELECT t.ticket_id, t.departure_datetime
+        FROM Ticket t
+        JOIN Purchases p ON t.ticket_id = p.ticket_id
+        WHERE p.email = %s AND t.ticket_id = %s
+        '''
+        cursor.execute(verify_ticket_query, (email, ticket_id))
+        ticket = cursor.fetchone()
+
+        if not ticket:
+            return "Invalid ticket or ticket does not belong to you.", 400
+
+        from datetime import datetime, timedelta
+        if ticket['departure_datetime'] <= datetime.now() + timedelta(hours=24):
+            return "You cannot cancel a trip less than 24 hours before departure.", 400
+
+        # Step 2: Remove ticket from `Purchases` and make it available again
+        delete_purchase_query = 'DELETE FROM Purchases WHERE ticket_id = %s AND email = %s'
+        cursor.execute(delete_purchase_query, (ticket_id, email))
+
+        # Commit the changes
+        conn.commit()
+
+        return redirect(url_for('view_my_flights'))
+
+    except Exception as e:
+        print(f"Error during cancellation: {e}")
+        return f"An error occurred while canceling the trip: {e}", 500
+
+    finally:
+        try:
+            cursor.close()
+        except Exception as e:
+            print(f"Error closing cursor: {e}")
+
+
+@app.route('/rate-flights', methods=['GET'])
+def rate_flights():
+    # Ensure the user is logged in
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    email = session['username']
+
+    try:
+        cursor = conn.cursor()
+
+        # Fetch flights that the user has taken (past flights)
+        query = '''
+        SELECT 
+            t.ticket_id,
+            t.flight_number,
+            t.airline_name,
+            f.departure_datetime,
+            f.arrival_datetime,
+            t.calculated_ticket_price,
+            f.flight_status
+        FROM 
+            Ticket AS t
+        JOIN 
+            Purchases AS p ON t.ticket_id = p.ticket_id
+        JOIN 
+            Flight AS f ON t.flight_number = f.flight_number AND t.departure_datetime = f.departure_datetime AND t.airline_name = f.airline_name
+        WHERE 
+            p.email = %s AND f.departure_datetime < NOW()
+        '''
+        cursor.execute(query, (email,))
+        flights = cursor.fetchall()
+        cursor.close()
+
+        # Render the flights to a review page
+        return render_template('rate_flights.html', flights=flights)
+
+    except Exception as e:
+        print(f"Error fetching completed flights for rating: {e}")
+        return "An error occurred while fetching your completed flights.", 500
+
+
+@app.route('/submit-rating', methods=['POST'])
+def submit_rating():
+    # Ensure the user is logged in
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        # Extract data from the form
+        ticket_id = request.form['ticket_id']
+        rating = request.form['rating']
+        comment = request.form['comment']
+
+        cursor = conn.cursor()
+
+        # Insert the rating and comment into the `Takes` table
+        query = '''
+        INSERT INTO Takes (
+            flight_number, departure_datetime, airline_name, email, comment, rating
+        )
+        SELECT 
+            t.flight_number, t.departure_datetime, t.airline_name, p.email, %s, %s
+        FROM 
+            Ticket AS t
+        JOIN 
+            Purchases AS p ON t.ticket_id = p.ticket_id
+        WHERE 
+            t.ticket_id = %s
+        '''
+        cursor.execute(query, (comment, rating, ticket_id))
+        conn.commit()
+        cursor.close()
+
+        return redirect(url_for('rate_flights'))
+
+    except Exception as e:
+        print(f"Error submitting rating: {e}")
+        return "An error occurred while submitting your rating.", 500
+
 
 app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000

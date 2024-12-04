@@ -34,3 +34,12 @@ INSERT INTO Ticket VALUES (103, 400, '2024-11-14 12:05:20', 'Jet Blue', 530);
 
 INSERT INTO Purchases VALUES (100, 'evannnnn@gmail.com', 'Evan Dworkin', '123123', 'credit', '2024-09-09 10:00:00', '2025-10-10', 'evan', 'dworking', '2005-08-31');
 INSERT INTO Purchases VALUES (101, 'dante999@gmail.com', 'Dante Minasyan', '456456', 'debit', '2024-09-09 10:00:00', '2025-10-10', 'dante', 'minas', '2005-12-08');
+
+<!-- Customer's Test Cases -->
+INSERT INTO Flight VALUES (300, '2024-12-10 10:00:00', 'Jet Blue', 123, 300, 'Delayed', 1, 2, '2024-12-10 14:00:00');
+INSERT INTO Flight VALUES (500, '2024-12-10 08:00:00', 'Jet Blue', 123, 300, 'On-time', 1, 2, '2024-12-10 10:00:00');
+INSERT INTO Flight VALUES (600, '2024-12-20 13:00:00', 'Jet Blue', 456, 450, 'Delayed', 2, 1, '2024-12-20 15:00:00');
+INSERT INTO Flight VALUES (700, '2024-12-25 07:00:00', 'American Airlines', 999, 550, 'On-time', 1, 2, '2024-12-25 09:00:00');
+INSERT INTO Flight VALUES (800, '2025-01-05 14:00:00', 'American Airlines', 999, 400, 'Cancelled', 2, 1, '2025-01-05 16:00:00');
+
+ALTER TABLE Ticket ADD COLUMN is_canceled BOOLEAN DEFAULT FALSE;

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Flights</title>
+</head>
+<body>
+    <h1>My Upcoming Flights</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Ticket ID</th>
+                <th>Flight Number</th>
+                <th>Airline Name</th>
+                <th>Departure Time</th>
+                <th>Price</th>
+                <th>Passenger Name</th>
+                <th>Card Type</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if flights %}
+                {% for flight in flights %}
+                <tr>
+                    <td>{{ flight.ticket_id }}</td>
+                    <td>{{ flight.flight_number }}</td>
+                    <td>{{ flight.airline_name }}</td>
+                    <td>{{ flight.departure_datetime }}</td>
+                    <td>${{ flight.calculated_ticket_price }}</td>
+                    <td>{{ flight.passenger_first_name }} {{ flight.passenger_last_name }}</td>
+                    <td>{{ flight.card_type }}</td>
+                    <td>
+                        <!-- Cancel Button -->
+                        <form action="/cancel-trip" method="POST">
+                            <input type="hidden" name="ticket_id" value="{{ flight.ticket_id }}">
+                            <button type="submit">Cancel Trip</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="8">No upcoming flights found.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    
+    <!-- Back to Customer Page -->
+    <br>
+    <a href="/customerpage">Back to Customer Page</a>
+</body>
+</html>
