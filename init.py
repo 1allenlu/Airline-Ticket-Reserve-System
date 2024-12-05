@@ -692,89 +692,113 @@ def logout():
     
 @app.route('/track-spending', methods=['GET', 'POST'])
 def track_spending():
-    import datetime
     try:
         cursor = conn.cursor()
 
-        # Default view: past year and last 6 months
+        # Debug start
+        print("Method:", request.method)
+
         if request.method == 'GET':
             # Total spending in the past year
             year_query = '''
-            SELECT SUM(calculated_ticket_price) AS total_spent
-            FROM Ticket
-            JOIN Purchases ON Ticket.ticket_id = Purchases.ticket_id
-            WHERE Purchases.purchase_datetime >= DATE_SUB(NOW(), INTERVAL 1 YEAR);
+            SELECT SUM(t.calculated_ticket_price) AS total_spent
+            FROM Ticket t
+            JOIN Purchases p ON t.ticket_id = p.ticket_id
+            WHERE p.email = %s AND p.purchase_datetime >= DATE_SUB(NOW(), INTERVAL 1 YEAR);
             '''
-            cursor.execute(year_query)
+            print("Executing year query:", year_query)
+            cursor.execute(year_query, (session['username'],))
             total_spent_year = cursor.fetchone()
-            total_spent_year = total_spent_year['total_spent'] if total_spent_year and total_spent_year['total_spent'] else 0
+            total_spent_year = total_spent_year['total_spent'] if total_spent_year else 0
+
+            print("Total Spent in Past Year:", total_spent_year)
 
             # Month-wise spending for the last 6 months
             months_query = '''
             SELECT 
-                DATE_FORMAT(Purchases.purchase_datetime, '%Y-%m') AS month,
-                SUM(calculated_ticket_price) AS total_spent
-            FROM Ticket
-            JOIN Purchases ON Ticket.ticket_id = Purchases.ticket_id
-            WHERE Purchases.purchase_datetime >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+                DATE_FORMAT(p.purchase_datetime, '%%Y-%%m') AS month,  -- Escape % with %%
+                SUM(t.calculated_ticket_price) AS total_spent
+            FROM Ticket t
+            JOIN Purchases p ON t.ticket_id = p.ticket_id
+            WHERE p.email = %s AND p.purchase_datetime >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
             GROUP BY month
             ORDER BY month;
             '''
-            cursor.execute(months_query)
+            print("Executing months query:", months_query)
+            cursor.execute(months_query, (session['username'],))
             month_data = cursor.fetchall()
+            print("Month Data:", month_data)
 
-            print(f"Default Year Total: {total_spent_year}")
-            print(f"Default Month Data: {month_data}")
+            return render_template(
+                'track_spending.html',
+                total_spent_year=total_spent_year,
+                month_data=month_data,
+                total_spent_range=None,
+                range_data=None,
+                start_date=None,
+                end_date=None
+            )
 
-            return render_template('track_spending.html', 
-                                   total_spent_year=total_spent_year,
-                                   month_data=month_data)
-
-        # Custom date range
         elif request.method == 'POST':
             start_date = request.form.get('start_date')
             end_date = request.form.get('end_date')
 
             if not start_date or not end_date:
-                print("Missing start_date or end_date in POST request")
                 return "Invalid date range specified.", 400
 
-            print(f"Custom Range: Start={start_date}, End={end_date}")
+            print("Start Date:", start_date, "End Date:", end_date)
 
+            # Total spending in the custom range
             range_query = '''
+            SELECT SUM(t.calculated_ticket_price) AS total_spent
+            FROM Ticket t
+            JOIN Purchases p ON t.ticket_id = p.ticket_id
+            WHERE p.email = %s AND p.purchase_datetime BETWEEN %s AND %s;
+            '''
+            print("Executing range query:", range_query)
+            cursor.execute(range_query, (session['username'], start_date, end_date))
+            total_spent_range = cursor.fetchone()
+            total_spent_range = total_spent_range['total_spent'] if total_spent_range else 0
+
+            print("Total Spent in Custom Range:", total_spent_range)
+
+            # Month-wise spending in the custom range
+            range_month_query = '''
             SELECT 
-                DATE_FORMAT(Purchases.purchase_datetime, '%Y-%m') AS month,
-                SUM(calculated_ticket_price) AS total_spent
-            FROM Ticket
-            JOIN Purchases ON Ticket.ticket_id = Purchases.ticket_id
-            WHERE Purchases.purchase_datetime BETWEEN %s AND %s
+                DATE_FORMAT(p.purchase_datetime, '%%Y-%%m') AS month,  -- Escape % with %%
+                SUM(t.calculated_ticket_price) AS total_spent
+            FROM Ticket t
+            JOIN Purchases p ON t.ticket_id = p.ticket_id
+            WHERE p.email = %s AND p.purchase_datetime BETWEEN %s AND %s
             GROUP BY month
             ORDER BY month;
             '''
-            cursor.execute(range_query, (start_date, end_date))
+            print("Executing range month query:", range_month_query)
+            cursor.execute(range_month_query, (session['username'], start_date, end_date))
             range_data = cursor.fetchall()
+            print("Range Data:", range_data)
 
-            # Calculate total spending in the range
-            total_spent_range = sum(row['total_spent'] for row in range_data if row['total_spent'] is not None)
-
-            print(f"Custom Range Total: {total_spent_range}")
-            print(f"Custom Range Data: {range_data}")
-
-            return render_template('track_spending.html', 
-                                   total_spent_year=None,
-                                   month_data=None,
-                                   total_spent_range=total_spent_range,
-                                   range_data=range_data,
-                                   start_date=start_date,
-                                   end_date=end_date)
+            return render_template(
+                'track_spending.html',
+                total_spent_year=None,
+                month_data=None,
+                total_spent_range=total_spent_range,
+                range_data=range_data,
+                start_date=start_date,
+                end_date=end_date
+            )
 
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error in track_spending: {e}")
         return f"An error occurred while processing your request: {e}", 500
 
-   
-        
-        
+    finally:
+        try:
+            cursor.close()
+        except Exception as e:
+            print(f"Error closing cursor: {e}")
+
+
 
 app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000
