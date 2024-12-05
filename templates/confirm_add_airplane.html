@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmation - Add Airplane</title>
+</head>
+<body>
+    <h1>Airplane Added Successfully</h1>
+    {% if message %}
+        <p class="message">{{ message }}</p>
+    {% endif %}
+    <h2>All Airplanes Owned by {{ session.get('airline_name') }}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Airplane ID</th>
+                <th>Manufacturing Company</th>
+                <th>Model Number</th>
+                <th>Manufacturing Date</th>
+                <th>Number of Seats</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for airplane in airplanes %}
+            <tr>
+                <td>{{ airplane.airplane_id }}</td>
+                <td>{{ airplane.manufacturing_company }}</td>
+                <td>{{ airplane.model_number }}</td>
+                <td>{{ airplane.manufacturing_date }}</td>
+                <td>{{ airplane.number_of_seats }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if not airplanes %}
+        <p>No airplanes found for your airline.</p>
+    {% endif %}
+    <footer>
+        <a href="/staffHome">Back to Staff Home</a>
+    </footer>
+</body>
+</html>
