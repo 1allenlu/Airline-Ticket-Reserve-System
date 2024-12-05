@@ -299,75 +299,6 @@ def purchase_process():
     # Render the purchase form
     return render_template('purchase_process.html', flight_details=flight_details)
 
-
-
-# @app.route('/finalize-purchase', methods=['POST'])
-# def finalize_purchase():
-#     if 'username' not in session:
-#         return redirect(url_for('login'))
-
-#     try:
-#         # Log form data for debugging
-#         print("Form Data Received:", request.form)
-
-#         # Extract form data
-#         email = session.get('username')
-#         flight_number = request.form.get('flight_number')
-#         departure_datetime = request.form.get('departure_datetime')
-#         calculated_price = request.form.get('calculated_price')
-#         airline_name = request.form.get('airline_name')
-
-#         # Debug extracted fields
-#         print("Debugging Query Parameters:")
-#         print(f"Flight Number: {flight_number}")
-#         print(f"Departure Datetime: {departure_datetime}")
-#         print(f"Airline Name: {airline_name}")
-
-#         # Parse and validate dates
-#         from datetime import datetime
-#         departure_datetime = datetime.strptime(departure_datetime, '%Y-%m-%d %H:%M:%S')
-
-#         cursor = conn.cursor()
-
-#         # Flight check query with debugging
-#         flight_check_query = '''
-#         SELECT f.*, a.number_of_seats
-#         FROM Flight f
-#         JOIN Airplane a ON f.airplane_id = a.airplane_id
-#         WHERE f.flight_number = %s 
-#           AND f.departure_datetime = %s 
-#           AND LOWER(f.airline_name) = LOWER(%s)
-#         '''
-#         print(f"Executing Query: {flight_check_query} with values: ({flight_number}, {departure_datetime}, {airline_name})")
-#         cursor.execute(flight_check_query, (flight_number, departure_datetime, airline_name))
-#         flight = cursor.fetchone()
-
-#         if not flight:
-#             print("Flight not found. Checking available flights.")
-#             cursor.execute("SELECT * FROM Flight")
-#             all_flights = cursor.fetchall()
-#             print("Available Flights in DB:", all_flights)
-#             return "Flight does not exist. Please verify your input.", 400
-
-#         # Log the flight data
-#         print("Flight found:", flight)
-        
-#         print("Form Data Received in Finalize Purchase:", request.form)
-
-#         # Proceed with ticket insertion...
-#         return "Successfully found the flight. Proceeding to insert ticket."
-
-#     except Exception as e:
-#         print(f"Error during finalize purchase: {e}")
-#         return f"An error occurred: {e}", 500
-
-#     finally:
-#         try:
-#             cursor.close()
-#         except Exception as close_error:
-#             print(f"Error closing cursor: {close_error}")
-
-
 @app.route('/finalize-purchase', methods=['POST'])
 def finalize_purchase():
     # Ensure the user is logged in
@@ -617,6 +548,45 @@ def rate_flights():
         return "An error occurred while fetching your completed flights.", 500
 
 
+# @app.route('/submit-rating', methods=['POST'])
+# def submit_rating():
+#     # Ensure the user is logged in
+#     if 'username' not in session:
+#         return redirect(url_for('login'))
+
+#     try:
+#         # Extract data from the form
+#         ticket_id = request.form['ticket_id']
+#         rating = request.form['rating']
+#         comment = request.form['comment']
+
+#         cursor = conn.cursor()
+
+#         # Insert the rating and comment into the `Takes` table
+#         query = '''
+#         INSERT INTO Takes (
+#             flight_number, departure_datetime, airline_name, email, comment, rating
+#         )
+#         SELECT 
+#             t.flight_number, t.departure_datetime, t.airline_name, p.email, %s, %s
+#         FROM 
+#             Ticket AS t
+#         JOIN 
+#             Purchases AS p ON t.ticket_id = p.ticket_id
+#         WHERE 
+#             t.ticket_id = %s
+#         '''
+#         cursor.execute(query, (comment, rating, ticket_id))
+#         conn.commit()
+#         cursor.close()
+
+#         return redirect(url_for('rate_flights'))
+
+#     except Exception as e:
+#         print(f"Error submitting rating: {e}")
+#         return "An error occurred while submitting your rating.", 500
+
+
 @app.route('/submit-rating', methods=['POST'])
 def submit_rating():
     # Ensure the user is logged in
@@ -624,37 +594,94 @@ def submit_rating():
         return redirect(url_for('login'))
 
     try:
+        # Log incoming form data for debugging
+        print("Form Data Received:", request.form)
+
         # Extract data from the form
-        ticket_id = request.form['ticket_id']
-        rating = request.form['rating']
-        comment = request.form['comment']
+        ticket_id = request.form.get('ticket_id')
+        rating = request.form.get('rating')
+        comment = request.form.get('comment')
+
+        # Validate inputs
+        if not ticket_id or not rating or not comment:
+            print("Missing required form fields.")
+            return "Invalid input. Please ensure all fields are filled out.", 400
+
+        # Log extracted data
+        print(f"Ticket ID: {ticket_id}, Rating: {rating}, Comment: {comment}")
 
         cursor = conn.cursor()
 
-        # Insert the rating and comment into the `Takes` table
-        query = '''
-        INSERT INTO Takes (
-            flight_number, departure_datetime, airline_name, email, comment, rating
-        )
-        SELECT 
-            t.flight_number, t.departure_datetime, t.airline_name, p.email, %s, %s
-        FROM 
-            Ticket AS t
-        JOIN 
-            Purchases AS p ON t.ticket_id = p.ticket_id
-        WHERE 
-            t.ticket_id = %s
+        # Validate ticket exists and belongs to the logged-in user
+        email = session['username']
+        ticket_validation_query = '''
+        SELECT t.flight_number, t.departure_datetime, t.airline_name
+        FROM Ticket t
+        JOIN Purchases p ON t.ticket_id = p.ticket_id
+        WHERE t.ticket_id = %s AND p.email = %s
         '''
-        cursor.execute(query, (comment, rating, ticket_id))
-        conn.commit()
-        cursor.close()
+        cursor.execute(ticket_validation_query, (ticket_id, email))
+        ticket = cursor.fetchone()
 
+        if not ticket:
+            print("Ticket validation failed: Ticket does not belong to the user or does not exist.")
+            return "Invalid ticket. Please ensure the ticket belongs to you.", 400
+
+        # Log ticket details for debugging
+        print("Validated Ticket Details:", ticket)
+
+        # Check if the rating already exists
+        check_rating_query = '''
+        SELECT *
+        FROM Takes
+        WHERE flight_number = %s AND departure_datetime = %s AND email = %s AND airline_name = %s
+        '''
+        cursor.execute(check_rating_query, (
+            ticket['flight_number'], ticket['departure_datetime'], email, ticket['airline_name']
+        ))
+        existing_rating = cursor.fetchone()
+
+        if existing_rating:
+            print("Rating already exists. Updating instead of inserting.")
+            # Update the existing rating
+            update_rating_query = '''
+            UPDATE Takes
+            SET comment = %s, rating = %s
+            WHERE flight_number = %s AND departure_datetime = %s AND email = %s AND airline_name = %s
+            '''
+            cursor.execute(update_rating_query, (
+                comment, rating, ticket['flight_number'], ticket['departure_datetime'], email, ticket['airline_name']
+            ))
+        else:
+            print("No existing rating. Inserting a new one.")
+            # Insert a new rating
+            insert_rating_query = '''
+            INSERT INTO Takes (
+                flight_number, departure_datetime, airline_name, email, comment, rating
+            ) VALUES (%s, %s, %s, %s, %s, %s)
+            '''
+            cursor.execute(insert_rating_query, (
+                ticket['flight_number'], ticket['departure_datetime'], ticket['airline_name'],
+                email, comment, rating
+            ))
+
+        # Commit transaction
+        conn.commit()
+
+        # Log success message
+        print("Rating submitted successfully.")
         return redirect(url_for('rate_flights'))
 
     except Exception as e:
         print(f"Error submitting rating: {e}")
-        return "An error occurred while submitting your rating.", 500
+        return f"An error occurred while submitting your rating: {e}", 500
 
+    finally:
+        try:
+            cursor.close()
+        except Exception as close_error:
+            print(f"Error closing cursor: {close_error}")
+            
 
 @app.route('/logout', methods=['GET'])
 def logout():
