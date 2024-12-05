@@ -313,7 +313,7 @@ def finalize_purchase():
         email = session.get('username')
         flight_number = request.form.get('flight_number')
         departure_datetime = request.form.get('departure_datetime')
-        calculated_price = float(request.form.get('calculated_price'))
+        calculated_price = (request.form.get('calculated_price')) # here
         airline_name = request.form.get('airline_name')
         name_on_card = request.form.get('name_on_card')
         card_number = request.form.get('card_number')
@@ -547,46 +547,6 @@ def rate_flights():
         print(f"Error fetching completed flights for rating: {e}")
         return "An error occurred while fetching your completed flights.", 500
 
-
-# @app.route('/submit-rating', methods=['POST'])
-# def submit_rating():
-#     # Ensure the user is logged in
-#     if 'username' not in session:
-#         return redirect(url_for('login'))
-
-#     try:
-#         # Extract data from the form
-#         ticket_id = request.form['ticket_id']
-#         rating = request.form['rating']
-#         comment = request.form['comment']
-
-#         cursor = conn.cursor()
-
-#         # Insert the rating and comment into the `Takes` table
-#         query = '''
-#         INSERT INTO Takes (
-#             flight_number, departure_datetime, airline_name, email, comment, rating
-#         )
-#         SELECT 
-#             t.flight_number, t.departure_datetime, t.airline_name, p.email, %s, %s
-#         FROM 
-#             Ticket AS t
-#         JOIN 
-#             Purchases AS p ON t.ticket_id = p.ticket_id
-#         WHERE 
-#             t.ticket_id = %s
-#         '''
-#         cursor.execute(query, (comment, rating, ticket_id))
-#         conn.commit()
-#         cursor.close()
-
-#         return redirect(url_for('rate_flights'))
-
-#     except Exception as e:
-#         print(f"Error submitting rating: {e}")
-#         return "An error occurred while submitting your rating.", 500
-
-
 @app.route('/submit-rating', methods=['POST'])
 def submit_rating():
     # Ensure the user is logged in
@@ -690,114 +650,114 @@ def logout():
     # Redirect to a goodbye page
     return render_template('goodbye.html', message="You have successfully logged out.")
     
-@app.route('/track-spending', methods=['GET', 'POST'])
+@app.route('/track-spending', methods=['GET'])
 def track_spending():
+    if 'username' not in session:
+        return redirect(url_for('login'))  # Ensure user is logged in
+
+    email = session['username']  # Get logged-in user's email
+
     try:
         cursor = conn.cursor()
 
-        # Debug start
-        print("Method:", request.method)
+        # Query for total spending in the past year
+        year_query = '''
+        SELECT SUM(calculated_ticket_price) AS total_spent
+        FROM Ticket
+        JOIN Purchases ON Ticket.ticket_id = Purchases.ticket_id
+        WHERE Purchases.email = %s AND Purchases.purchase_datetime >= DATE_SUB(NOW(), INTERVAL 1 YEAR);
+        '''
+        cursor.execute(year_query, (email,))
+        total_spent_year = cursor.fetchone()['total_spent'] or 0
 
-        if request.method == 'GET':
-            # Total spending in the past year
-            year_query = '''
-            SELECT SUM(t.calculated_ticket_price) AS total_spent
-            FROM Ticket t
-            JOIN Purchases p ON t.ticket_id = p.ticket_id
-            WHERE p.email = %s AND p.purchase_datetime >= DATE_SUB(NOW(), INTERVAL 1 YEAR);
-            '''
-            print("Executing year query:", year_query)
-            cursor.execute(year_query, (session['username'],))
-            total_spent_year = cursor.fetchone()
-            total_spent_year = total_spent_year['total_spent'] if total_spent_year else 0
+        # Query for month-wise spending in the last 6 months
+        months_query = '''
+        SELECT DATE_FORMAT(Purchases.purchase_datetime, '%%Y-%%m') AS month,
+               SUM(calculated_ticket_price) AS total_spent
+        FROM Ticket
+        JOIN Purchases ON Ticket.ticket_id = Purchases.ticket_id
+        WHERE Purchases.email = %s AND Purchases.purchase_datetime >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        GROUP BY month
+        ORDER BY month DESC;
+        '''
+        cursor.execute(months_query, (email,))
+        month_data = cursor.fetchall()
 
-            print("Total Spent in Past Year:", total_spent_year)
-
-            # Month-wise spending for the last 6 months
-            months_query = '''
-            SELECT 
-                DATE_FORMAT(p.purchase_datetime, '%%Y-%%m') AS month,  -- Escape % with %%
-                SUM(t.calculated_ticket_price) AS total_spent
-            FROM Ticket t
-            JOIN Purchases p ON t.ticket_id = p.ticket_id
-            WHERE p.email = %s AND p.purchase_datetime >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
-            GROUP BY month
-            ORDER BY month;
-            '''
-            print("Executing months query:", months_query)
-            cursor.execute(months_query, (session['username'],))
-            month_data = cursor.fetchall()
-            print("Month Data:", month_data)
-
-            return render_template(
-                'track_spending.html',
-                total_spent_year=total_spent_year,
-                month_data=month_data,
-                total_spent_range=None,
-                range_data=None,
-                start_date=None,
-                end_date=None
-            )
-
-        elif request.method == 'POST':
-            start_date = request.form.get('start_date')
-            end_date = request.form.get('end_date')
-
-            if not start_date or not end_date:
-                return "Invalid date range specified.", 400
-
-            print("Start Date:", start_date, "End Date:", end_date)
-
-            # Total spending in the custom range
-            range_query = '''
-            SELECT SUM(t.calculated_ticket_price) AS total_spent
-            FROM Ticket t
-            JOIN Purchases p ON t.ticket_id = p.ticket_id
-            WHERE p.email = %s AND p.purchase_datetime BETWEEN %s AND %s;
-            '''
-            print("Executing range query:", range_query)
-            cursor.execute(range_query, (session['username'], start_date, end_date))
-            total_spent_range = cursor.fetchone()
-            total_spent_range = total_spent_range['total_spent'] if total_spent_range else 0
-
-            print("Total Spent in Custom Range:", total_spent_range)
-
-            # Month-wise spending in the custom range
-            range_month_query = '''
-            SELECT 
-                DATE_FORMAT(p.purchase_datetime, '%%Y-%%m') AS month,  -- Escape % with %%
-                SUM(t.calculated_ticket_price) AS total_spent
-            FROM Ticket t
-            JOIN Purchases p ON t.ticket_id = p.ticket_id
-            WHERE p.email = %s AND p.purchase_datetime BETWEEN %s AND %s
-            GROUP BY month
-            ORDER BY month;
-            '''
-            print("Executing range month query:", range_month_query)
-            cursor.execute(range_month_query, (session['username'], start_date, end_date))
-            range_data = cursor.fetchall()
-            print("Range Data:", range_data)
-
-            return render_template(
-                'track_spending.html',
-                total_spent_year=None,
-                month_data=None,
-                total_spent_range=total_spent_range,
-                range_data=range_data,
-                start_date=start_date,
-                end_date=end_date
-            )
+        return render_template(
+            'track_spending.html',
+            total_spent_year=total_spent_year,
+            month_data=month_data,
+            total_spent_range=None,
+            range_data=None,
+            start_date=None,
+            end_date=None
+        )
 
     except Exception as e:
         print(f"Error in track_spending: {e}")
         return f"An error occurred while processing your request: {e}", 500
 
     finally:
-        try:
-            cursor.close()
-        except Exception as e:
-            print(f"Error closing cursor: {e}")
+        cursor.close()
 
+
+@app.route('/track-spending-range', methods=['POST'])
+def track_spending_range():
+    if 'username' not in session:
+        return redirect(url_for('login'))  # Ensure user is logged in
+
+    email = session['username']  # Get logged-in user's email
+
+    try:
+        start_date = request.form.get('start_date')
+        end_date = request.form.get('end_date')
+
+        # Validate input dates
+        if not start_date or not end_date:
+            return "Invalid date range specified.", 400
+
+        cursor = conn.cursor()
+
+        # Query for total spending in the custom date range
+        range_query = '''
+        SELECT SUM(calculated_ticket_price) AS total_spent
+        FROM Ticket
+        JOIN Purchases ON Ticket.ticket_id = Purchases.ticket_id
+        WHERE Purchases.email = %s AND Purchases.purchase_datetime BETWEEN %s AND %s;
+        '''
+        cursor.execute(range_query, (email, start_date, end_date))
+        total_spent_range = cursor.fetchone()['total_spent'] or 0
+
+        # Query for month-wise spending in the custom date range
+        range_month_query = '''
+        SELECT DATE_FORMAT(Purchases.purchase_datetime, '%%Y-%%m') AS month,
+               SUM(calculated_ticket_price) AS total_spent
+        FROM Ticket
+        JOIN Purchases ON Ticket.ticket_id = Purchases.ticket_id
+        WHERE Purchases.email = %s AND Purchases.purchase_datetime BETWEEN %s AND %s
+        GROUP BY month
+        ORDER BY month DESC;
+        '''
+        cursor.execute(range_month_query, (email, start_date, end_date))
+        range_data = cursor.fetchall()
+
+        # Return custom range results
+        return render_template(
+            'track_spending_range.html',
+            total_spent_range=total_spent_range,
+            range_data=range_data,
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    except Exception as e:
+        print(f"Error in track_spending_range: {e}")
+        return f"An error occurred while processing your request: {e}", 500
+
+    finally:
+        cursor.close()
+        
+        
 
 
 app.secret_key = 'some key that you will never guess'
