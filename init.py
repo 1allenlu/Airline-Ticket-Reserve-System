@@ -212,14 +212,6 @@ def logout():
 	session.clear()
 	return redirect('/')
 
-@app.route('/customerpage')
-def customer_page():
-    return render_template('customer_page.html')
-
-@app.route('/staff_page')
-def staff_page():
-    return render_template('staff_page.html')
-
 @app.route('/customer_register')
 def customer_register():
     return render_template('customer_register.html')
@@ -358,8 +350,8 @@ def searchFlights1():
 @app.route('/purchase-process', methods=['POST'])
 def purchase_process():
     # Ensure the user is logged in
-    if 'username' not in session:
-        return redirect(url_for('/'))
+    if 'username' not in session or session['user_type'] != 'customer':
+        return render_template('index.html')
 
     # Debug: Log form data received
     print("Form Data Received for Purchase Process:", request.form)
@@ -382,8 +374,8 @@ def purchase_process():
 @app.route('/finalize-purchase', methods=['POST'])
 def finalize_purchase():
     # Ensure the user is logged in
-    if 'username' not in session:
-        return redirect(url_for('login'))
+    if 'username' not in session or session['user_type'] != 'customer':
+        return render_template('index.html')
 
     try:
         # Log incoming form data
@@ -498,8 +490,8 @@ def finalize_purchase():
 @app.route('/view-my-flights', methods=['GET'])
 def view_my_flights():
     # Ensure the user is logged in
-    if 'username' not in session:
-        return redirect(url_for('login'))
+    if 'username' not in session or session['user_type'] != 'customer':
+        return render_template('index.html')
 
     email = session['username']  # Retrieve the logged-in user's email
     try:
@@ -540,8 +532,8 @@ def view_my_flights():
 @app.route('/cancel-trip', methods=['POST'])
 def cancel_trip():
     # Ensure the user is logged in
-    if 'username' not in session:
-        return redirect(url_for('login'))
+    if 'username' not in session or session['user_type'] != 'customer':
+        return render_template('index.html')
 
     try:
         cursor = conn.cursor()
@@ -588,8 +580,8 @@ def cancel_trip():
 @app.route('/rate-flights', methods=['GET'])
 def rate_flights():
     # Ensure the user is logged in
-    if 'username' not in session:
-        return redirect(url_for('login'))
+    if 'username' not in session or session['user_type'] != 'customer':
+        return render_template('index.html')
 
     email = session['username']
 
@@ -629,8 +621,8 @@ def rate_flights():
 @app.route('/submit-rating', methods=['POST'])
 def submit_rating():
     # Ensure the user is logged in
-    if 'username' not in session:
-        return redirect(url_for('login'))
+    if 'username' not in session or session['user_type'] != 'customer':
+        return render_template('index.html')
 
     try:
         # Log incoming form data for debugging
@@ -724,14 +716,15 @@ def submit_rating():
 
 @app.route('/track-spending', methods=['GET'])
 def track_spending():
-   if 'username' not in session:
-       return redirect(url_for('login'))  # Ensure user is logged in
+   
+    if 'username' not in session or session['user_type'] != 'customer':
+        return render_template('index.html')
 
 
-   email = session['username']  # Get logged-in user's email
+    email = session['username']  # Get logged-in user's email
 
 
-   try:
+    try:
        cursor = conn.cursor()
 
 
@@ -771,12 +764,12 @@ def track_spending():
        )
 
 
-   except Exception as e:
+    except Exception as e:
        print(f"Error in track_spending: {e}")
        return f"An error occurred while processing your request: {e}", 500
 
 
-   finally:
+    finally:
        cursor.close()
 
 
@@ -784,8 +777,8 @@ def track_spending():
 
 @app.route('/track-spending-range', methods=['POST'])
 def track_spending_range():
-   if 'username' not in session:
-       return redirect(url_for('login'))  # Ensure user is logged in
+   if 'username' not in session or session['user_type'] != 'customer':
+        return render_template('index.html')
 
 
    email = session['username']  # Get logged-in user's email
@@ -855,7 +848,7 @@ def track_spending_range():
 @app.route('/viewFlights', methods=['GET', 'POST'])
 def viewFlights():
     if 'username' not in session or session['user_type'] != 'staff':
-        return redirect(url_for('hello'))
+        return render_template('index.html')
 
     airline_name = session.get('airline_name')  # Assume staff's airline name is stored in the session
     cursor = conn.cursor()
@@ -913,7 +906,7 @@ def viewFlights():
 @app.route('/createFlight', methods=['GET', 'POST'])
 def createFlight():
     if 'username' not in session or session['user_type'] != 'staff':
-        return redirect(url_for('loginStaff'))
+        return render_template('index.html')
 
     if request.method == 'POST':
         airline_name = session.get('airline_name')  # Get airline name from session
@@ -979,7 +972,7 @@ def createFlight():
 @app.route('/staffHome')
 def staffHome():
     if 'username' not in session or session['user_type'] != 'staff':
-        return redirect(url_for('hello'))
+        return render_template('index.html')
 
     return render_template('staff_page.html')
 
@@ -988,7 +981,7 @@ def staffHome():
 @app.route('/changeFlightStatus', methods=['GET', 'POST'])
 def changeFlightStatus():
     if 'username' not in session or session['user_type'] != 'staff':
-        return redirect(url_for('hello'))
+        return render_template('index.html')
 
     if request.method == 'POST':
         flight_number = request.form['flight_number']
@@ -1031,7 +1024,7 @@ def changeFlightStatus():
 @app.route('/addAirplane', methods=['GET', 'POST'])
 def addAirplane():
     if 'username' not in session or session['user_type'] != 'staff':
-        return redirect(url_for('loginStaff'))
+        return render_template('index.html')
 
     airline_name = session.get('airline_name')  # Retrieve airline name from session
 
@@ -1067,7 +1060,7 @@ def addAirplane():
 @app.route('/confirmAddAirplane')
 def confirmAddAirplane():
     if 'username' not in session or session['user_type'] != 'staff':
-        return redirect(url_for('loginStaff'))
+        return render_template('index.html')
 
     airline_name = session.get('airline_name')  # Retrieve airline name from session
     cursor = conn.cursor()
@@ -1087,7 +1080,7 @@ def confirmAddAirplane():
 @app.route('/addAirport', methods=['GET', 'POST'])
 def addAirport():
     if 'username' not in session or session['user_type'] != 'staff':
-        return redirect(url_for('loginStaff'))
+        return render_template('index.html')
 
     if request.method == 'POST':
         airport_code = request.form['airport_code']
@@ -1142,7 +1135,7 @@ def viewFlightRatings():
 @app.route('/scheduleMaintenance', methods=['GET', 'POST'])
 def scheduleMaintenance():
     if 'username' not in session or session['user_type'] != 'staff':
-        return redirect(url_for('loginStaff'))
+        return render_template('index.html')
 
     if request.method == 'POST':
         airplane_id = request.form['airplane_id']
@@ -1174,7 +1167,7 @@ def scheduleMaintenance():
 @app.route('/viewFrequentCustomers', methods=['GET', 'POST'])
 def viewFrequentCustomers():
     if 'username' not in session or session['user_type'] != 'staff':
-        return redirect(url_for('loginStaff'))
+        return render_template('index.html')
 
     airline_name = session.get('airline_name')  # Get airline name from session
     cursor = conn.cursor()
@@ -1218,7 +1211,7 @@ def viewFrequentCustomers():
 @app.route('/viewRevenue', methods=['GET'])
 def viewRevenue():
     if 'username' not in session or session['user_type'] != 'staff':
-        return redirect(url_for('loginStaff'))
+        return render_template('index.html')
 
     airline_name = session.get('airline_name')
     cursor = conn.cursor()
