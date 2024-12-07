@@ -16,20 +16,10 @@ conn = pymysql.connect(host='127.0.0.1',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
 
-#Define a route to hello function
 @app.route('/')
 def hello():
 	return render_template('index.html')
 
-# #Define route for login
-# @app.route('/login')
-# def login():
-# 	return render_template('login.html')
-
-#Define route for register
-@app.route('/register1')
-def register():
-	return render_template('customer_register.html')
 
 @app.route('/login1Auth', methods=['POST'])
 def login1Auth():
@@ -102,6 +92,7 @@ def register1Auth():
     passport_expiration = request.form['passport_expiration']
     passport_country = request.form['passport_country']
     date_of_birth = request.form['date_of_birth']
+    phone_number = request.form['phone_number']
 
     hashed_password = md5(thepassword.encode()).hexdigest()
 
@@ -128,8 +119,18 @@ def register1Auth():
             city, state_name, zip_code, passport_number, passport_expiration,
             passport_country, date_of_birth
         ))
+        
+        # Insert into Customer_Phone_Number table
+        ins_phone = '''
+        INSERT INTO Customer_Phone_Number (
+            email, customer_number
+        ) VALUES (%s, %s)
+        '''
+        cursor.execute(ins_phone, (email, phone_number))
+        
         conn.commit()
         cursor.close()
+
         return redirect(url_for('hello'))
 
 
@@ -142,6 +143,8 @@ def register2Auth():
     first_name = request.form['first_name']
     last_name = request.form['last_name']
     date_of_birth = request.form['date_of_birth']
+    email = request.form['email']
+    phone_number = request.form['phone_number']
 
     # Hash the password
     hashed_password = md5(thepassword.encode()).hexdigest()
@@ -168,15 +171,31 @@ def register2Auth():
         return render_template('staff_register.html', error=error)
     
     # Insert the new airline staff
-    ins = '''
+    ins_staff = '''
     INSERT INTO Airline_Staff (
         username, thepassword, airline_name, first_name, last_name, date_of_birth
     ) VALUES (%s, %s, %s, %s, %s, %s)
     '''
     try:
-        cursor.execute(ins, (
+        cursor.execute(ins_staff, (
             username, hashed_password, airline_name, first_name, last_name, date_of_birth
         ))
+
+        # Insert the staff email into the Staff_Email table
+        ins_email = '''
+        INSERT INTO Staff_Email (username, staff_mail)
+        VALUES (%s, %s)
+        '''
+        cursor.execute(ins_email, (username, email))
+
+        # Insert the staff phone number into the Staff_Phone_Number table
+        ins_phone = '''
+        INSERT INTO Staff_Phone_Number (username, staff_number)
+        VALUES (%s, %s)
+        '''
+        cursor.execute(ins_phone, (username, phone_number))
+
+        # Commit the transaction
         conn.commit()
     except Exception as e:
         conn.rollback()
