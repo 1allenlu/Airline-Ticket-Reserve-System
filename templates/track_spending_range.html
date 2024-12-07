@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Track Spending for Range</title>
+</head>
+<body>
+   <h1>Track Spending for Custom Range</h1>
+
+
+   <!-- Custom Date Range Spending -->
+   <h2>Total Spending from {{ start_date }} to {{ end_date }}:</h2>
+   <p>Total: ${{ total_spent_range }}</p>
+
+
+   <h2>Month-Wise Spending in the Specified Range</h2>
+   <table border="1">
+       <thead>
+           <tr>
+               <th>Month</th>
+               <th>Amount Spent ($)</th>
+           </tr>
+       </thead>
+       <tbody>
+           {% if range_data %}
+               {% for row in range_data %}
+               <tr>
+                   <td>{{ row['month'] }}</td>
+                   <td>{{ row['total_spent'] }}</td>
+               </tr>
+               {% endfor %}
+           {% else %}
+               <tr>
+                   <td colspan="2">No data available</td>
+               </tr>
+           {% endif %}
+       </tbody>
+   </table>
+
+
+   <a href="/track-spending">Back to Track Spending</a>
+</body>
+</html>

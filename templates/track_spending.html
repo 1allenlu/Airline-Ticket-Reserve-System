@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Track Spending</title>
+</head>
+<body>
+   <h1>Track Spending</h1>
+
+
+   <!-- Total Spending in the Past Year -->
+   <h2>Total Spending in the Past Year</h2>
+   <p>Total: ${{ total_spent_year }}</p>
+
+
+   <!-- Month-Wise Spending for Last 6 Months -->
+   <h2>Month-Wise Spending for Last 6 Months</h2>
+   <table border="1">
+       <thead>
+           <tr>
+               <th>Month</th>
+               <th>Amount Spent ($)</th>
+           </tr>
+       </thead>
+       <tbody>
+           {% if month_data %}
+               {% for row in month_data %}
+               <tr>
+                   <td>{{ row['month'] }}</td>
+                   <td>{{ row['total_spent'] }}</td>
+               </tr>
+               {% endfor %}
+           {% else %}
+               <tr>
+                   <td colspan="2">No data available</td>
+               </tr>
+           {% endif %}
+       </tbody>
+   </table>
+
+
+   <!-- Redirect to the Range-Specific Spending Page -->
+   <h2>Track Spending for a Custom Date Range</h2>
+   <form action="/track-spending-range" method="POST">
+       <label for="start_date">Start Date:</label>
+       <input type="date" id="start_date" name="start_date" required><br>
+
+
+       <label for="end_date">End Date:</label>
+       <input type="date" id="end_date" name="end_date" required><br>
+
+
+       <button type="submit">Submit</button>
+   </form>
+
+
+   <a href="/customerpage">Back to Customer Page</a>
+</body>
+</html>

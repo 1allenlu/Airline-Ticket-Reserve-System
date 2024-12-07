@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Flight History</title>
+
+</head>
+<body>
+    <h1>Flight History for {{ customer_email }}</h1>
+    {% if flights %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Flight Number</th>
+                    <th>Departure Date & Time</th>
+                    <th>Arrival Date & Time</th>
+                    <th>Departure Airport</th>
+                    <th>Arrival Airport</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for flight in flights %}
+                <tr>
+                    <td>{{ flight.flight_number }}</td>
+                    <td>{{ flight.departure_datetime }}</td>
+                    <td>{{ flight.arrival_datetime }}</td>
+                    <td>{{ flight.departure_airport }}</td>
+                    <td>{{ flight.arrival_airport }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No flights found for this customer.</p>
+    {% endif %}
+    <footer>
+        <a href="/viewFrequentCustomers">Back to Frequent Customers</a>
+    </footer>
+</body>
+</html>

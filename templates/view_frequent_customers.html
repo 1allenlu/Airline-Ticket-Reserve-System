@@ -2,16 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Frequent Customers</title>
 </head>
 <body>
-    <h1>Most Frequent Customer</h1>
+    <h1>Frequent Customers</h1>
     {% if frequent_customer %}
-        <p>Email: {{ frequent_customer.email }}</p>
-        <p>Number of Flights: {{ frequent_customer.flight_count }}</p>
+        <div class="message">
+            <p><strong>Most Frequent Customer (Last Year):</strong></p>
+            <p>Email: {{ frequent_customer.email }}</p>
+            <p>Total Flights Taken: {{ frequent_customer.flight_count }}</p>
+        </div>
     {% else %}
-        <p>No frequent customers found for the last year.</p>
+        <p class="message">No frequent customers found for the last year.</p>
     {% endif %}
-    <a href="/staffHome">Back to Staff Home</a>
+
+    <h2>View Flight History of a Customer</h2>
+    <form method="POST">
+        <label for="customer_email">Enter Customer Email:</label><br>
+        <input type="email" id="customer_email" name="customer_email" placeholder="e.g., customer@example.com" required><br>
+        <button type="submit">View Flight History</button>
+    </form>
 </body>
 </html>

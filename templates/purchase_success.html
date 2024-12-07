@@ -9,14 +9,14 @@
     <h1>Ticket Purchase Successful</h1>
     <p>Thank you for your purchase, {{ passenger_name }}! Here are your ticket details:</p>
     <ul>
-        <li>Flight Number: {{ flight.flight_number }}</li>
-        <li>Airline Name: {{ flight.airline_name }}</li>
-        <li>Departure Airport: {{ flight.departure_airport }}</li>
-        <li>Destination Airport: {{ flight.destination_airport }}</li>
-        <li>Departure Time: {{ flight.departure_datetime }}</li>
-        <li>Price: ${{ flight.base_price }}</li>
+        <li>Flight Number: {{ flight['flight_number'] }}</li>
+        <li>Airline Name: {{ flight['airline_name'] }}</li>
+        <li>Departure Airport: {{ flight['departure_airport'] }}</li>
+        <li>Destination Airport: {{ flight['destination_airport'] }}</li>
+        <li>Departure Time: {{ flight['departure_datetime'] }}</li>
+        <li>Price: ${{ flight['calculated_price'] }}</li>
         <li>Payment Method: {{ payment_method }}</li>
     </ul>
-    <a href="/">Return to Home</a>
+    <a href="{{ url_for('customer_page') }}">Return to Customer Page</a>
 </body>
 </html>
